@@ -1,71 +1,132 @@
-import { supabase } from './lib/supabase'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import PostCard from './components/PostCard'
+import { getDonationSummary, formatKrw } from './lib/donations'
+import { categoryMeta, getAllPosts, getFeaturedPosts } from './lib/posts'
 
-export const revalidate = 3600 // 1시간마다 갱신
+export const revalidate = 3600
 
 export default async function Home() {
-  // 실제 운영시에는 Supabase에서 데이터를 가져오도록 쿼리 작성 필요
-  // const { data: posts } = await supabase.from('posts').select('*').order('created_at', { ascending: false })
-  
-  const dummyPosts = [
-    {
-      id: 1,
-      title: "2026년 AI 트렌드: 에이전틱 AI의 시대가 온다",
-      description: "단순한 챗봇을 넘어 스스로 생각하고 도구를 사용하는 에이전트들의 발전 방향을 짚어봅니다.",
-      category: "AI",
-      created_at: new Date().toISOString(),
-      slug: "ai-trends-2026"
-    },
-    {
-      id: 2,
-      title: "M4 맥미니 한 달 사용기: 작지만 압도적인 성능",
-      description: "성능과 공간 효율성 사이에서 고민하신다면 이 글이 정답이 될 것입니다.",
-      category: "Hardware",
-      created_at: new Date().toISOString(),
-      slug: "m4-mac-mini-review"
-    }
-  ]
+  const featured = getFeaturedPosts()
+  const allPosts = getAllPosts()
+  const hotPosts = allPosts.slice(0, 5)
+  const leadPost = allPosts[0]
+  const leadSecondary = allPosts.slice(1, 4)
+  const donationSummary = await getDonationSummary()
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
-      <header className="mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-slate-900">
-          최신 IT 트렌드
-        </h1>
-        <p className="text-lg text-slate-600">
-          AI 에이전트가 매일 큐레이션하는 깊이 있는 IT 인사이트
-        </p>
-      </header>
+    <div className="container home">
+      <section className="notice-bar" aria-label="공지">
+        <strong>NOTICE</strong>
+        <p>체험단/협찬 여부와 실제 구매 만족도 기준을 명확히 구분해서 리뷰합니다.</p>
+      </section>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        {dummyPosts.map((post) => (
-          <article key={post.id} className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300">
-            <div className="p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {post.category}
-                </span>
-                <time className="text-xs text-slate-400">
-                  {format(new Date(post.created_at), 'PPP', { locale: ko })}
-                </time>
-              </div>
-              <h2 className="text-2xl font-bold mb-4 group-hover:text-blue-600 transition-colors leading-tight">
-                <Link href={`/post/${post.slug}`}>
-                  {post.title}
-                </Link>
-              </h2>
-              <p className="text-slate-600 mb-6 line-clamp-2 text-sm leading-relaxed">
-                {post.description}
+      <section className="lead-board" aria-label="메인 보드">
+        <article className="lead-main">
+          <p className="hero__eyebrow">TODAY&apos;S PICK</p>
+          <h1>{leadPost.title}</h1>
+          <p>{leadPost.description}</p>
+          <div className="lead-main__meta">
+            <span>{format(new Date(leadPost.createdAt), 'PPP', { locale: ko })}</span>
+            <span>{leadPost.author}</span>
+            <span>{leadPost.readMinutes}분 읽기</span>
+          </div>
+          <Link href={`/post/${leadPost.slug}`} className="lead-main__cta">
+            메인 리뷰 보기
+          </Link>
+        </article>
+
+        <aside className="lead-side">
+          <h2>지금 많이 찾는 글</h2>
+          <ol>
+            {hotPosts.map((post, index) => (
+              <li key={post.id}>
+                <span>{index + 1}</span>
+                <Link href={`/post/${post.slug}`}>{post.title}</Link>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      </section>
+
+      <section aria-label="에디터 추천">
+        <div className="section-title-row">
+          <h2>에디터 추천</h2>
+          <span>구매 만족도가 높았던 콘텐츠</span>
+        </div>
+        <div className="featured-grid">
+          {featured.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      </section>
+
+      <section className="content-grid">
+        <div>
+          <div className="section-title-row">
+            <h2>최신 발행 글</h2>
+            <span>업데이트 {format(new Date(), 'PPP', { locale: ko })}</span>
+          </div>
+          <div className="post-list">
+            {allPosts.map((post) => (
+              <PostCard key={post.id} post={post} compact />
+            ))}
+          </div>
+        </div>
+
+        <aside className="sidebar" aria-label="사이드바">
+          <section className="sidebar-card sidebar-card--donation">
+            <h3>기부 투명성 공개</h3>
+            <div className="donation-mini">
+              <p>
+                <span>누적 후원금</span>
+                <strong>{formatKrw(donationSummary.incomeTotal)}</strong>
               </p>
-              <Link href={`/post/${post.slug}`} className="text-sm font-bold text-slate-900 flex items-center gap-1 group-hover:gap-2 transition-all">
-                더 읽어보기 <span className="text-blue-600">→</span>
-              </Link>
+              <p>
+                <span>누적 집행금</span>
+                <strong>{formatKrw(donationSummary.expenseTotal)}</strong>
+              </p>
+              <p>
+                <span>현재 잔액</span>
+                <strong>{formatKrw(donationSummary.balance)}</strong>
+              </p>
             </div>
-          </article>
-        ))}
-      </div>
+            <Link href="/donation" className="sidebar-card__link">
+              전체 기부 내역 보기
+            </Link>
+          </section>
+
+          <section className="sidebar-card">
+            <h3>카테고리</h3>
+            <ul>
+              {Object.entries(categoryMeta).map(([slug, meta]) => (
+                <li key={slug}>
+                  <Link href={`/category/${slug}`}>{meta.name}</Link>
+                  <p>{meta.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="sidebar-card">
+            <h3>빠른 요약</h3>
+            <ul>
+              {leadSecondary.map((post) => (
+                <li key={post.id}>
+                  <Link href={`/post/${post.slug}`}>{post.title}</Link>
+                  <p>{post.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="sidebar-card sidebar-card--notice">
+            <h3>구매 체크포인트</h3>
+            <p>가격만 보지 말고 AS 정책, 배송 조건, 반품 가능 기간까지 함께 비교하세요.</p>
+          </section>
+        </aside>
+      </section>
     </div>
   )
 }

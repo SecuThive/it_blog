@@ -1,18 +1,41 @@
 import Link from 'next/link'
+import { categoryMeta } from '../lib/posts'
+
+const navItems = [
+  { href: '/', label: '홈' },
+  { href: '/category/smartphone', label: categoryMeta.smartphone.name },
+  { href: '/category/laptop', label: categoryMeta.laptop.name },
+  { href: '/category/review', label: categoryMeta.review.name },
+  { href: '/category/deal', label: categoryMeta.deal.name },
+  { href: '/donation', label: '기부공개' },
+]
 
 export default function Navbar() {
   return (
-    <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tighter text-slate-900">
-          IT BLOG<span className="text-blue-600">.</span>
-        </Link>
-        <div className="flex gap-6 text-sm font-medium text-slate-600">
-          <Link href="/" className="hover:text-blue-600 transition-colors">홈</Link>
-          <Link href="/category/news" className="hover:text-blue-600 transition-colors">최신뉴스</Link>
-          <Link href="/category/review" className="hover:text-blue-600 transition-colors">리뷰</Link>
+    <header className="site-header">
+      <div className="top-ribbon">
+        <div className="site-header__inner">
+          <p>프리미엄 IT 상품 큐레이션</p>
+          <span>매일 오전 9시 업데이트</span>
         </div>
       </div>
-    </nav>
+      <div className="main-header">
+        <div className="site-header__inner">
+          <Link href="/" className="brand">
+            오늘의 IT 블로그
+          </Link>
+          <nav aria-label="메인 메뉴" className="main-nav">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <Link href="/donation" className="header-cta">
+            기부 참여
+          </Link>
+        </div>
+      </div>
+    </header>
   )
 }

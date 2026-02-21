@@ -1,33 +1,29 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Navbar from "./components/Navbar";
-
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import './globals.css'
+import Navbar from './components/Navbar'
 
 export const metadata: Metadata = {
-  title: "AI 전문 IT 블로그",
-  description: "최신 IT 트렌드와 AI 뉴스를 가장 빠르게 전달합니다.",
-};
+  title: '오늘의 IT 블로그',
+  description: '스마트폰, 노트북, 태블릿, IT 액세서리 리뷰와 구매가이드를 다루는 블로그',
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <body className={`${inter.className} bg-slate-50 text-slate-900 antialiased`}>
+      <body>
+        <div className="page-bg" />
         <Navbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <footer className="border-t py-12 bg-white mt-20">
-          <div className="max-w-5xl mx-auto px-4 text-center text-slate-500 text-sm">
-            © 2026 IT BLOG. All rights reserved.
+        <main className="page-main">{children}</main>
+        <footer className="site-footer">
+          <div className="container">
+            <p>© 2026 오늘의 IT 블로그</p>
+            <p>
+              IT 상품 선택에 도움이 되는 리뷰와 구매 정보를 전합니다. <Link href="/donation">기부 내역 공개 보기</Link>
+            </p>
           </div>
         </footer>
       </body>
     </html>
-  );
+  )
 }
