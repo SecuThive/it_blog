@@ -5,7 +5,7 @@ import { ko } from 'date-fns/locale'
 import { notFound } from 'next/navigation'
 import CommentSection from '../../components/CommentSection'
 import PostCard from '../../components/PostCard'
-import { categoryMeta, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
+import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
 
 type PostPageProps = {
   params: Promise<{ slug: string }>
@@ -13,7 +13,7 @@ type PostPageProps = {
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     return { title: '게시글 없음' }
@@ -27,20 +27,22 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     notFound()
   }
 
-  const relatedPosts = getRelatedPosts(post.slug, post.category)
-  const { prev, next } = getPrevNextPost(post.slug)
+  const [relatedPosts, { prev, next }] = await Promise.all([
+    getRelatedPosts(post.slug, post.category),
+    getPrevNextPost(post.slug),
+  ])
 
   return (
     <div className="container post-page">
       <article className="post-article">
         <header className="post-header">
-          <span className="chip">{categoryMeta[post.category].name}</span>
+          <span className="chip">{getCategoryLabel(post.category)}</span>
           <h1>{post.title}</h1>
           <p>{post.description}</p>
           <div className="post-header__meta">

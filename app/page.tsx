@@ -2,18 +2,21 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import PostCard from './components/PostCard'
-import { getDonationSummary, formatKrw } from './lib/donations'
-import { categoryMeta, getAllPosts, getFeaturedPosts } from './lib/posts'
+// import { getDonationSummary, formatKrw } from './lib/donations'
+import { getAllPosts, getFeaturedPosts, getPostCategorySummaries } from './lib/posts'
 
 export const revalidate = 3600
 
 export default async function Home() {
-  const featured = getFeaturedPosts()
-  const allPosts = getAllPosts()
+  const [featured, allPosts, categories] = await Promise.all([
+    getFeaturedPosts(),
+    getAllPosts(),
+    getPostCategorySummaries(),
+  ])
   const hotPosts = allPosts.slice(0, 5)
   const leadPost = allPosts[0]
   const leadSecondary = allPosts.slice(1, 4)
-  const donationSummary = await getDonationSummary()
+  // const donationSummary = await getDonationSummary()
 
   return (
     <div className="container home">
@@ -25,16 +28,25 @@ export default async function Home() {
       <section className="lead-board" aria-label="메인 보드">
         <article className="lead-main">
           <p className="hero__eyebrow">TODAY&apos;S PICK</p>
-          <h1>{leadPost.title}</h1>
-          <p>{leadPost.description}</p>
-          <div className="lead-main__meta">
-            <span>{format(new Date(leadPost.createdAt), 'PPP', { locale: ko })}</span>
-            <span>{leadPost.author}</span>
-            <span>{leadPost.readMinutes}분 읽기</span>
-          </div>
-          <Link href={`/post/${leadPost.slug}`} className="lead-main__cta">
-            메인 리뷰 보기
-          </Link>
+          {leadPost ? (
+            <>
+              <h1>{leadPost.title}</h1>
+              <p>{leadPost.description}</p>
+              <div className="lead-main__meta">
+                <span>{format(new Date(leadPost.createdAt), 'PPP', { locale: ko })}</span>
+                <span>{leadPost.author}</span>
+                <span>{leadPost.readMinutes}분 읽기</span>
+              </div>
+              <Link href={`/post/${leadPost.slug}`} className="lead-main__cta">
+                메인 리뷰 보기
+              </Link>
+            </>
+          ) : (
+            <>
+              <h1>아직 등록된 포스트가 없습니다.</h1>
+              <p>DB에 포스트를 추가하면 메인 콘텐츠가 자동으로 노출됩니다.</p>
+            </>
+          )}
         </article>
 
         <aside className="lead-side">
@@ -72,10 +84,12 @@ export default async function Home() {
             {allPosts.map((post) => (
               <PostCard key={post.id} post={post} compact />
             ))}
+            {allPosts.length === 0 ? <p>등록된 글이 없습니다.</p> : null}
           </div>
         </div>
 
         <aside className="sidebar" aria-label="사이드바">
+          {/* 기부 투명성 공개 카드 (비활성화)
           <section className="sidebar-card sidebar-card--donation">
             <h3>기부 투명성 공개</h3>
             <div className="donation-mini">
@@ -96,16 +110,18 @@ export default async function Home() {
               전체 기부 내역 보기
             </Link>
           </section>
+          */}
 
           <section className="sidebar-card">
             <h3>카테고리</h3>
             <ul>
-              {Object.entries(categoryMeta).map(([slug, meta]) => (
-                <li key={slug}>
-                  <Link href={`/category/${slug}`}>{meta.name}</Link>
-                  <p>{meta.description}</p>
+              {categories.map((category) => (
+                <li key={category.slug}>
+                  <Link href={`/category/${category.slug}`}>{category.name}</Link>
+                  <p>{category.description}</p>
                 </li>
               ))}
+              {categories.length === 0 ? <li>카테고리 데이터가 없습니다.</li> : null}
             </ul>
           </section>
 

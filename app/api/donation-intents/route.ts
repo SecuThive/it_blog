@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createDonationIntent, maskDonorName } from '../../lib/donations'
-
-const bankName = process.env.DONATION_BANK_NAME ?? '은행명 미설정'
-const accountNumber = process.env.DONATION_ACCOUNT_NUMBER ?? '계좌번호 미설정'
-const accountHolder = process.env.DONATION_ACCOUNT_HOLDER ?? '예금주 미설정'
+import {
+  createDonationIntent,
+  getActiveDonationVirtualAccount,
+  maskDonorName,
+} from '../../lib/donations'
 
 export async function POST(request: Request) {
   try {
@@ -26,15 +26,16 @@ export async function POST(request: Request) {
       message,
       depositorHint: `ITBLOG-${Date.now().toString().slice(-6)}`,
     })
+    const account = await getActiveDonationVirtualAccount()
 
     return NextResponse.json({
       success: true,
       intentId: intent.id,
       depositorNameRule: `${maskDonorName(donorName)} / ${intent.depositorHint}`,
       virtualAccount: {
-        bankName,
-        accountNumber,
-        accountHolder,
+        bankName: account.bankName,
+        accountNumber: account.accountNumber,
+        accountHolder: account.accountHolder,
       },
       amount,
       message: '입금 확인 후 자동으로 투명성 페이지에 반영됩니다.',

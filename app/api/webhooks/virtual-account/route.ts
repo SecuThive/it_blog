@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       providerTxId: String(payload?.providerTxId ?? ''),
       donorName: payload?.donorName ? String(payload.donorName) : undefined,
       amount: Number(payload?.amount ?? 0),
-      method: '계좌이체',
       message: payload?.message ? String(payload.message) : undefined,
       depositedAt: payload?.depositedAt ? String(payload.depositedAt) : undefined,
     })

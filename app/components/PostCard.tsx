@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import type { Post } from '../lib/posts'
-import { categoryMeta } from '../lib/posts'
+import { getCategoryLabel } from '../lib/posts'
 
 type PostCardProps = {
   post: Post
@@ -10,15 +10,15 @@ type PostCardProps = {
 }
 
 export default function PostCard({ post, compact = false }: PostCardProps) {
-  const category = categoryMeta[post.category]
+  const categoryLabel = getCategoryLabel(post.category)
 
   return (
     <article className={compact ? 'post-card post-card--compact' : 'post-card'}>
       <Link href={`/post/${post.slug}`} className={`post-card__cover post-card__cover--${post.category}`}>
-        <span>{category.name}</span>
+        <span>{categoryLabel}</span>
       </Link>
       <div className="post-card__top">
-        <span className="chip">{category.name}</span>
+        <span className="chip">{categoryLabel}</span>
         <time dateTime={post.createdAt}>{format(new Date(post.createdAt), 'PPP', { locale: ko })}</time>
       </div>
       <h3 className={compact ? 'post-card__title post-card__title--compact' : 'post-card__title'}>

@@ -1,6 +1,14 @@
 import { hasSupabaseAdmin, supabaseAdmin } from './supabase-admin'
 
-export type DonationMethod = '계좌이체' | '카카오페이' | '네이버페이'
+export type DonationMethod = string
+
+export type DonationVirtualAccount = {
+  bankName: string
+  accountNumber: string
+  accountHolder: string
+  provider: string
+  paymentMethod: string
+}
 
 export type DonationIncome = {
   id: string
@@ -34,47 +42,28 @@ export type DonationIntent = {
   paidAt?: string | null
 }
 
-const fallbackIncomes: DonationIncome[] = [
-  {
-    id: 'in-001',
-    date: '2026-02-03',
-    donor: '익명',
-    amount: 30000,
-    method: '카카오페이',
-    message: '좋은 정보 감사합니다.',
-  },
-  {
-    id: 'in-002',
-    date: '2026-02-10',
-    donor: '김**',
-    amount: 50000,
-    method: '계좌이체',
-  },
-  {
-    id: 'in-003',
-    date: '2026-02-16',
-    donor: '박**',
-    amount: 20000,
-    method: '네이버페이',
-  },
-]
+export async function getActiveDonationVirtualAccount(): Promise<DonationVirtualAccount> {
+  if (!hasSupabaseAdmin || !supabaseAdmin) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY가 설정되어 있지 않습니다.')
+  }
 
-const fallbackExpenses: DonationExpense[] = [
-  {
-    id: 'ex-001',
-    date: '2026-02-12',
-    title: '아동 식료품 지원',
-    amount: 60000,
-    organization: '굿네이버스',
-  },
-  {
-    id: 'ex-002',
-    date: '2026-02-19',
-    title: '겨울 난방비 지원',
-    amount: 30000,
-    organization: '아름다운재단',
-  },
-]
+  const { data, error } = await supabaseAdmin
+    .from('donation_virtual_accounts')
+    .select('bank_name, account_number, account_holder, provider, payment_method')
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error('활성화된 기부 계좌 설정이 없습니다.')
+
+  return {
+    bankName: String(data.bank_name),
+    accountNumber: String(data.account_number),
+    accountHolder: String(data.account_holder),
+    provider: String(data.provider),
+    paymentMethod: String(data.payment_method),
+  }
+}
 
 function normalizeDate(input?: string) {
   const value = input ?? new Date().toISOString()
@@ -87,30 +76,20 @@ export function formatKrw(value: number) {
 
 export function maskDonorName(name: string) {
   const trimmed = name.trim()
-  if (!trimmed) {
-    return '익명'
-  }
-
-  if (trimmed.length <= 1) {
-    return `${trimmed}*`
-  }
-
+  if (!trimmed) return '익명'
+  if (trimmed.length <= 1) return `${trimmed}*`
   return `${trimmed[0]}${'*'.repeat(trimmed.length - 1)}`
 }
 
 export async function getDonationIncomes(): Promise<DonationIncome[]> {
-  if (!hasSupabaseAdmin || !supabaseAdmin) {
-    return [...fallbackIncomes].sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  }
+  if (!hasSupabaseAdmin || !supabaseAdmin) return []
 
   const { data, error } = await supabaseAdmin
     .from('donation_incomes')
     .select('id, date, donor, amount, method, message, provider_tx_id')
     .order('date', { ascending: false })
 
-  if (error || !data) {
-    return [...fallbackIncomes].sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  }
+  if (error || !data) return []
 
   return data.map((row) => ({
     id: String(row.id),
@@ -124,18 +103,14 @@ export async function getDonationIncomes(): Promise<DonationIncome[]> {
 }
 
 export async function getDonationExpenses(): Promise<DonationExpense[]> {
-  if (!hasSupabaseAdmin || !supabaseAdmin) {
-    return [...fallbackExpenses].sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  }
+  if (!hasSupabaseAdmin || !supabaseAdmin) return []
 
   const { data, error } = await supabaseAdmin
     .from('donation_expenses')
     .select('id, date, title, amount, organization, receipt_url')
     .order('date', { ascending: false })
 
-  if (error || !data) {
-    return [...fallbackExpenses].sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  }
+  if (error || !data) return []
 
   return data.map((row) => ({
     id: String(row.id),
@@ -153,11 +128,7 @@ export async function getDonationSummary() {
   const incomeTotal = incomes.reduce((sum, item) => sum + item.amount, 0)
   const expenseTotal = expenses.reduce((sum, item) => sum + item.amount, 0)
 
-  return {
-    incomeTotal,
-    expenseTotal,
-    balance: incomeTotal - expenseTotal,
-  }
+  return { incomeTotal, expenseTotal, balance: incomeTotal - expenseTotal }
 }
 
 export async function createDonationIntent(input: {
@@ -174,9 +145,7 @@ export async function createDonationIntent(input: {
   const donorName = input.donorName.trim()
   const amount = Math.floor(input.amount)
 
-  if (!donorName || amount <= 0) {
-    throw new Error('유효하지 않은 기부 요청입니다.')
-  }
+  if (!donorName || amount <= 0) throw new Error('유효하지 않은 기부 요청입니다.')
 
   const row = {
     donor_name: donorName,
@@ -190,9 +159,7 @@ export async function createDonationIntent(input: {
 
   const { data, error } = await supabaseAdmin.from('donation_intents').insert(row).select('*').single()
 
-  if (error || !data) {
-    throw new Error(error?.message ?? '기부 의도 생성에 실패했습니다.')
-  }
+  if (error || !data) throw new Error(error?.message ?? '기부 의도 생성에 실패했습니다.')
 
   return {
     id: String(data.id),
@@ -209,9 +176,7 @@ export async function createDonationIntent(input: {
 }
 
 export async function getDonationIntentById(intentId: string): Promise<DonationIntent | null> {
-  if (!hasSupabaseAdmin || !supabaseAdmin) {
-    return null
-  }
+  if (!hasSupabaseAdmin || !supabaseAdmin) return null
 
   const { data, error } = await supabaseAdmin
     .from('donation_intents')
@@ -219,9 +184,7 @@ export async function getDonationIntentById(intentId: string): Promise<DonationI
     .eq('id', intentId)
     .maybeSingle()
 
-  if (error || !data) {
-    return null
-  }
+  if (error || !data) return null
 
   return {
     id: String(data.id),
@@ -242,7 +205,6 @@ export async function recordDepositedDonation(input: {
   providerTxId: string
   donorName?: string
   amount: number
-  method?: DonationMethod
   message?: string
   depositedAt?: string
 }) {
@@ -253,9 +215,7 @@ export async function recordDepositedDonation(input: {
   const providerTxId = input.providerTxId.trim()
   const amount = Math.floor(input.amount)
 
-  if (!providerTxId || amount <= 0) {
-    throw new Error('유효하지 않은 입금 웹훅 데이터입니다.')
-  }
+  if (!providerTxId || amount <= 0) throw new Error('유효하지 않은 입금 웹훅 데이터입니다.')
 
   const { data: existingIncome } = await supabaseAdmin
     .from('donation_incomes')
@@ -263,9 +223,7 @@ export async function recordDepositedDonation(input: {
     .eq('provider_tx_id', providerTxId)
     .maybeSingle()
 
-  if (existingIncome) {
-    return { duplicated: true }
-  }
+  if (existingIncome) return { duplicated: true }
 
   let donor = '익명'
 
@@ -276,37 +234,29 @@ export async function recordDepositedDonation(input: {
       .eq('id', input.intentId)
       .maybeSingle()
 
-    if (intentData?.donor_masked) {
-      donor = String(intentData.donor_masked)
-    }
+    if (intentData?.donor_masked) donor = String(intentData.donor_masked)
   }
 
-  if (input.donorName) {
-    donor = maskDonorName(input.donorName)
-  }
+  if (input.donorName) donor = maskDonorName(input.donorName)
+  const account = await getActiveDonationVirtualAccount()
 
   const { error: incomeError } = await supabaseAdmin.from('donation_incomes').insert({
     date: normalizeDate(input.depositedAt),
     donor,
     amount,
-    method: input.method ?? '계좌이체',
+    method: account.paymentMethod,
     message: input.message?.trim() || null,
-    provider: 'virtual_account',
+    provider: account.provider,
     provider_tx_id: providerTxId,
     intent_id: input.intentId ?? null,
   })
 
-  if (incomeError) {
-    throw new Error(incomeError.message)
-  }
+  if (incomeError) throw new Error(incomeError.message)
 
   if (input.intentId) {
     await supabaseAdmin
       .from('donation_intents')
-      .update({
-        status: 'paid',
-        paid_at: new Date().toISOString(),
-      })
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
       .eq('id', input.intentId)
   }
 

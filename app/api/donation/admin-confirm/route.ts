@@ -26,7 +26,6 @@ export async function POST(request: Request) {
       providerTxId,
       donorName,
       amount,
-      method: '계좌이체',
       message,
       depositedAt,
     })
