@@ -1030,6 +1030,28 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
 }
 
+/* 현재 읽는 섹션 active */
+.post-toc__item.is-active > a {
+  color: var(--point);
+  font-weight: 700;
+  background: var(--point-soft);
+  border-radius: var(--radius-sm);
+}
+
+.post-toc__item.is-active .post-toc__num {
+  background: var(--point);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.post-toc__item > a {
+  transition: color var(--transition), background var(--transition);
+}
+
+.post-toc__num {
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+
 .post-toc__footer {
   padding: 10px 16px;
   border-top: 1px solid var(--line-soft);

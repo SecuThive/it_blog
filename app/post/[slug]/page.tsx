@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import CommentSection from '../../components/CommentSection'
 import PostCard from '../../components/PostCard'
 import FaqAccordion from '../../components/FaqAccordion'
+import PostToc from '../../components/PostToc'
 import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
 
 import ReactMarkdown from 'react-markdown'
@@ -126,28 +127,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </article>
 
         {/* ── 목차 사이드바 ── */}
-        {post.sections.length > 0 && (
-          <aside className="post-toc animate-up">
-            <div className="post-toc__inner">
-              <p className="post-toc__label">목차</p>
-              <nav>
-                <ol className="post-toc__list">
-                  {post.sections.map((section, idx) => (
-                    <li key={idx} className="post-toc__item">
-                      <a href={`#section-${idx}`}>
-                        <span className="post-toc__num">{idx + 1}</span>
-                        <span>{cleanHeading(section.heading)}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-              <div className="post-toc__footer">
-                <span>{post.readMinutes}분 읽기</span>
-              </div>
-            </div>
-          </aside>
-        )}
+        <PostToc sections={post.sections} readMinutes={post.readMinutes} />
       </div>
 
       {/* ── 이전/다음 글 ── */}
