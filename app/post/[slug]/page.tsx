@@ -63,7 +63,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
           <div className="post-content">
             {post.sections.map((section, idx) => (
-              <div key={section.heading} id={`section-${idx}`} className="post-section">
+              <div key={idx} id={`section-${idx}`} className="post-section">
                 <h2>
                   <span className="post-section-num">{String(idx + 1).padStart(2, '0')}</span>
                   {section.heading}
