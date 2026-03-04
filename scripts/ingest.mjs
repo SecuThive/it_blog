@@ -400,6 +400,9 @@ async function main() {
 
       const post = await buildDetailedKoreanPost(item, feed)
 
+      const baseSlug = toSlug(item.title || url) || toSlug(url)
+      const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
+
       const coverImageUrl = await cacheCoverToStorage({
         bucket: 'covers',
         slug,
@@ -410,9 +413,6 @@ async function main() {
       // read_minutes heuristic (from your guide)
       const approxChars = post.sections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
       const readMinutes = Math.max(3, Math.ceil(Math.min(approxChars, 3000) / 300) + 1)
-
-      const baseSlug = toSlug(item.title || url) || toSlug(url)
-      const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
 
       await upsertPostAndSections({
         slug,
