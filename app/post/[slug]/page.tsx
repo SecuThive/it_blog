@@ -16,6 +16,10 @@ type PostPageProps = {
   params: Promise<{ slug: string }>
 }
 
+function cleanHeading(heading: string) {
+  return heading.replace(/\(SEO[^)]*\)/gi, '').trim()
+}
+
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
@@ -77,7 +81,7 @@ export default async function PostPage({ params }: PostPageProps) {
               <div key={idx} id={`section-${idx}`} className="post-section">
                 <h2>
                   <span className="post-section-num">{String(idx + 1).padStart(2, '0')}</span>
-                  {section.heading}
+                  {cleanHeading(section.heading)}
                 </h2>
                 <div className="post-md">
                   {section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
@@ -104,7 +108,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     <li key={idx} className="post-toc__item">
                       <a href={`#section-${idx}`}>
                         <span className="post-toc__num">{idx + 1}</span>
-                        <span>{section.heading}</span>
+                        <span>{cleanHeading(section.heading)}</span>
                       </a>
                     </li>
                   ))}
