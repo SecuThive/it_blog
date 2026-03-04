@@ -61,24 +61,6 @@ export default async function PostPage({ params }: PostPageProps) {
               <img className="post-header__cover" src={post.coverImageUrl} alt={post.title} />
             ) : null}
 
-            {/* Scan-friendly decision box */}
-            <div className="post-callout" aria-label="요약 박스">
-              <div className="post-callout__title">한 줄 요약</div>
-              <div className="post-callout__grid">
-                <div className="post-callout__item">
-                  <div className="post-callout__label">추천</div>
-                  <div className="post-callout__desc">지금 기기 불편이 명확하고, 구매가 당장 필요한 경우</div>
-                </div>
-                <div className="post-callout__item">
-                  <div className="post-callout__label">보류</div>
-                  <div className="post-callout__desc">한국 가격/출시/프로모션 확정 후 비교해서 결정</div>
-                </div>
-                <div className="post-callout__item">
-                  <div className="post-callout__label">스킵</div>
-                  <div className="post-callout__desc">현재 기기가 충분하고 체감 업그레이드가 애매한 경우</div>
-                </div>
-              </div>
-            </div>
 
             {post.tags.length > 0 && (
               <ul className="tag-list">
