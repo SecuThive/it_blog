@@ -2,5 +2,8 @@
 alter table public.posts add column if not exists cover_image_url text;
 alter table public.posts add column if not exists source_url text;
 
+-- Optional: for safe upserts & freshness tracking
+alter table public.posts add column if not exists updated_at timestamptz not null default now();
+
 -- Optional index for filtering
 create index if not exists idx_posts_category_created_at on public.posts(category, created_at desc);

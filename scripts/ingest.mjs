@@ -239,32 +239,55 @@ async function markIngested({ sourceId, url, title, publishedAt }) {
   if (error) throw error
 }
 
-async function createPost({ slug, title, description, category, tags, author, featured, readMinutes, createdAt, coverImageUrl, sourceUrl, sections }) {
+async function upsertPostAndSections({
+  slug,
+  title,
+  description,
+  category,
+  tags,
+  author,
+  featured,
+  readMinutes,
+  createdAt,
+  coverImageUrl,
+  sourceUrl,
+  sections,
+}) {
+  // 1) Upsert post by slug (idempotent)
   const { data: postRow, error: postError } = await supabase
     .from('posts')
-    .insert({
-      slug,
-      title,
-      description,
-      category,
-      tags,
-      author,
-      featured,
-      read_minutes: readMinutes,
-      created_at: createdAt,
-      cover_image_url: coverImageUrl || null,
-      source_url: sourceUrl || null,
-    })
+    .upsert(
+      {
+        slug,
+        title,
+        description,
+        category,
+        tags,
+        author,
+        featured,
+        read_minutes: readMinutes,
+        created_at: createdAt,
+        cover_image_url: coverImageUrl || null,
+        source_url: sourceUrl || null,
+      },
+      { onConflict: 'slug' },
+    )
     .select('id')
     .single()
 
   if (postError) throw postError
 
   const postId = postRow.id
+
+  // 2) Delete existing sections then re-insert (idempotent)
+  const { error: delErr } = await supabase.from('post_sections').delete().eq('post_id', postId)
+  if (delErr) throw delErr
+
   const sectionRows = sections.map((s, idx) => ({
     post_id: postId,
     position: idx + 1,
     heading: s.heading,
+    // IMPORTANT: keep real newlines (\n\n) for paragraphs.
     content: s.content,
   }))
 
@@ -296,10 +319,14 @@ async function main() {
 
       const post = await buildDetailedKoreanPost(item, feed)
 
+      // read_minutes heuristic (from your guide)
+      const approxChars = post.sections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
+      const readMinutes = Math.max(3, Math.ceil(Math.min(approxChars, 3000) / 300) + 1)
+
       const baseSlug = toSlug(item.title || url) || toSlug(url)
       const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
 
-      await createPost({
+      await upsertPostAndSections({
         slug,
         title: post.title,
         description: post.description,
@@ -307,7 +334,7 @@ async function main() {
         tags: post.tags,
         author: '오늘의 IT 블로그',
         featured: false,
-        readMinutes: 5,
+        readMinutes,
         createdAt: publishedAt,
         coverImageUrl: post.coverImageUrl,
         sourceUrl: post.sourceUrl,
