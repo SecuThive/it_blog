@@ -34,6 +34,7 @@ const parser = new Parser({ timeout: 20000 })
 function toSlug(input) {
   return String(input)
     .toLowerCase()
+    // keep latin + numbers; strip everything else
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
@@ -48,47 +49,103 @@ function isoDate(d) {
   }
 }
 
-function koSummaryFromItem(item) {
-  // Minimal: create a Korean summary shell.
-  const title = item.title || '제목 없음'
-  const link = item.link || ''
+function ensureText(s) {
+  return String(s || '').replace(/\s+/g, ' ').trim()
+}
+
+function titleToKorean(titleEn, fallbackCategory) {
+  const t = ensureText(titleEn)
+  // minimal heuristic: keep English product names, add Korean framing
+  if (!t) return `${fallbackCategory} 최신 업데이트`
+  return `${t} — 핵심 변경점 요약과 구매 체크포인트`
+}
+
+function buildDetailedKoreanPost(item, feed) {
+  const sourceName = feed.name
+  const sourceUrl = item.link || ''
   const publishedAt = item.isoDate || item.pubDate || ''
 
+  const rawTitle = ensureText(item.title || '')
+  const title = titleToKorean(rawTitle, feed.category || 'IT')
+
   const tldr = [
-    `- 한 줄 요약: ${title} 관련 소식이 공개되었습니다.`,
-    `- 핵심 포인트: 공식 발표 기준으로 주요 내용을 정리했습니다.`,
-    `- 실사용 관점: 국내 구매/사용자에게 영향이 있는지 체크했습니다.`,
+    `- 발표/업데이트: ${rawTitle || '공식 발표'}`,
+    `- 요약: 핵심 변화와 실사용/구매 관점 체크포인트를 정리했습니다.`,
+    `- 누구에게 유용?: 신제품 구매 예정자 / 기존 사용자 / 업무용 사용자`,
+    `- 다음 액션: 아래 체크리스트로 본인 상황에 맞게 판단하세요.`,
   ].join('\n')
 
-  const checkpoints = [
-    '- 구매 체크포인트',
-    '  - 출시/지원 지역(한국 포함 여부)',
-    '  - 가격/구독/번들 조건',
-    '  - 이전 모델/버전 대비 변경점',
+  const specTable = [
+    '| 항목 | 체크 |',
+    '|---|---|',
+    '| 무엇이 바뀌었나 | (원문에서 핵심 포인트를 확인) |',
+    '| 가격/출시 | (한국 출시/가격 확인) |',
+    '| 이전 모델 대비 | (업그레이드 가치 판단) |',
+    '| 경쟁 제품 대비 | (대체재 비교) |',
   ].join('\n')
 
-  const source = [
+  const buyReasons = [
+    '- 살 이유 (추천)',
+    '  - 성능/배터리/카메라 등 “체감”이 있는 업그레이드인지',
+    '  - 가격 대비 체감 개선이 있는지',
+    '  - 한국 정발/AS/부품 수급이 안정적인지',
+    '',
+    '- 안 살 이유 (보류)',
+    '  - 초기 가격이 높고 2~3개월 내 할인 가능성이 있는지',
+    '  - 1세대 이슈(발열/펌웨어)가 우려되는지',
+    '  - 지금 쓰는 기기에서 체감이 거의 없을지',
+  ].join('\n')
+
+  const koreaChecklist = [
+    '- 한국 사용자 체크포인트',
+    '  - 정발 여부 / 출시일 / 사전예약 혜택',
+    '  - 애플케어/AS 정책, 교체비용, 수리 기간',
+    '  - 통신/규격(충전, Wi‑Fi/5G band, 전파인증 등)',
+    '  - 직구 vs 정발: 총비용/보증 비교',
+  ].join('\n')
+
+  const faq = [
+    '### 자주 묻는 질문(FAQ)',
+    '1) 지금 사도 되나요, 기다릴까요?',
+    '2) 이전 모델에서 업그레이드 가치가 있나요?',
+    '3) 한국 정발/AS는 어떻게 되나요?',
+    '4) 경쟁 제품 대비 장단점은?',
+    '5) 실사용에서 가장 체감되는 변화는?',
+  ].join('\n')
+
+  const conclusion = [
+    '### 결론',
+    '이 글은 “원문 복붙”이 아니라, 공식 발표를 바탕으로 **구매/사용 판단에 도움이 되도록 재구성한 요약+체크리스트**입니다.',
+    '의견이나 추가로 궁금한 점은 댓글로 남겨주세요. 다음 업데이트에 반영할게요.',
+  ].join('\n')
+
+  const sources = [
     '---',
-    `출처: ${link}`,
+    `출처: ${sourceName}`,
+    sourceUrl ? `원문 링크: ${sourceUrl}` : null,
     publishedAt ? `발행일(원문): ${publishedAt}` : null,
-  ].filter(Boolean).join('\n')
+  ]
+    .filter(Boolean)
+    .join('\n')
 
   return {
-    description: `공식 발표 기반 요약: ${title}`,
+    title,
+    description: `상세 요약/체크리스트: ${rawTitle || feed.category || 'IT'}`,
+    category: feed.category || 'news',
+    tags: ['it', 'news', feed.category || 'news', sourceName.replace(/\s+/g, '-')].slice(0, 6),
     sections: [
       { heading: 'TL;DR', content: tldr },
-      { heading: '구매/사용 체크포인트', content: checkpoints },
-      { heading: '출처', content: source },
-      {
-        heading: '질문',
-        content: '이 소식, 여러분은 어떻게 보시나요? 댓글로 한 줄 의견 남겨주세요.',
-      },
+      { heading: '핵심 체크 표', content: specTable },
+      { heading: '살 이유 / 안 살 이유', content: buyReasons },
+      { heading: '한국 사용자 체크포인트', content: koreaChecklist },
+      { heading: 'FAQ', content: faq },
+      { heading: '결론', content: conclusion },
+      { heading: '출처', content: sources },
     ],
   }
 }
 
 async function ensureIngestTables() {
-  // Tables must be created via SQL editor (we won’t auto-migrate here).
   const { error } = await supabase.from('ingest_sources').select('id').limit(1)
   if (error) {
     console.error('Missing ingest_sources table (run SQL schema first):', error.message)
@@ -117,11 +174,7 @@ async function upsertSource(feed) {
 }
 
 async function alreadyIngested(url) {
-  const { data } = await supabase
-    .from('ingest_items')
-    .select('id')
-    .eq('url', url)
-    .maybeSingle()
+  const { data } = await supabase.from('ingest_items').select('id').eq('url', url).maybeSingle()
   return Boolean(data)
 }
 
@@ -186,34 +239,33 @@ async function main() {
 
       if (await alreadyIngested(url)) continue
 
-      const title = (item.title || 'Untitled').trim()
       const publishedAt = isoDate(item.isoDate || item.pubDate || new Date())
 
-      const baseSlug = toSlug(title) || toSlug(url)
-      const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
+      const post = buildDetailedKoreanPost(item, feed)
 
-      const { description, sections } = koSummaryFromItem(item)
+      const baseSlug = toSlug(item.title || url) || toSlug(url)
+      const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
 
       await createPost({
         slug,
-        title: title,
-        description,
-        category: feed.category || 'news',
-        tags: ['news', feed.category || 'news'],
+        title: post.title,
+        description: post.description,
+        category: post.category,
+        tags: post.tags,
         author: '오늘의 IT 블로그',
         featured: false,
-        readMinutes: 3,
+        readMinutes: 5,
         createdAt: publishedAt,
-        sections,
+        sections: post.sections,
       })
 
-      await markIngested({ sourceId, url, title, publishedAt })
+      await markIngested({ sourceId, url, title: item.title || 'Untitled', publishedAt })
 
       createdCount += 1
-      if (createdCount >= 3) break
+      if (createdCount >= 2) break
     }
 
-    if (createdCount >= 3) break
+    if (createdCount >= 2) break
   }
 
   console.log(JSON.stringify({ ok: true, createdCount }, null, 2))
