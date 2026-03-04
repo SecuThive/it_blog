@@ -22,14 +22,37 @@ function cleanHeading(heading: string) {
   return heading.replace(/\(SEO[^)]*\)/gi, '').trim()
 }
 
-// 제목에서 앞 3단어만 추출해 쿠팡 검색 키워드로 사용
+// 제목 앞 3단어 추출 (폴백용) — 영어 불용어 제거
+const STOP_WORDS = new Set(['the', 'a', 'an', 'with', 'and', 'or', 'for', 'of', 'in', 'on', 'at', 'new', 'all'])
+
 function deriveSearchKeyword(title: string): string {
   return title
     .replace(/[·:·\-]/g, ' ')
     .split(/\s+/)
-    .filter(Boolean)
+    .filter(w => w.length > 1 && !STOP_WORDS.has(w.toLowerCase()))
     .slice(0, 3)
     .join(' ')
+}
+
+// 태그 또는 제목으로 기기별 맞춤 악세사리 키워드 생성
+const NOISE_TAGS = new Set([
+  'it', 'news', 'apple', 'google', 'microsoft', 'samsung', 'lg',
+  'apple-newsroom', '칩셋', '업그레이드', '배터리', '사전예약',
+  '최신', '공개', '발표', '정리', '핵심', '출시', '리뷰',
+  'thunderbolt5', 'thunderbolt', 'usb', 'npu', 'rtx', 'gtx',
+])
+
+function deriveAccessoryKeyword(title: string, tags: string[]): string {
+  const productTags = tags
+    .filter(t => !NOISE_TAGS.has(t.toLowerCase()) && t.length > 2)
+    .slice(0, 2)
+    .map(t => t.replace(/-/g, ' '))
+
+  const base = productTags.length > 0
+    ? productTags.join(' ')
+    : deriveSearchKeyword(title)
+
+  return `${base} 악세사리`
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
@@ -125,7 +148,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 </h2>
                 <div className="post-md">
                   {section.heading.includes('악세사리') || section.heading.includes('대체재') || section.heading.includes('비교 프레임') ? (
-                    <CoupangProducts keyword={`${deriveSearchKeyword(post.title)} 악세사리`} />
+                    <CoupangProducts keyword={deriveAccessoryKeyword(post.title, post.tags)} />
                   ) : section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
                     <FaqAccordion text={section.content} />
                   ) : (
