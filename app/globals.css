@@ -42,6 +42,10 @@
 
 /* ─── 기본 리셋 ───────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+}
+
 html, body { margin: 0; padding: 0; }
 
 body {
@@ -810,14 +814,24 @@ a { color: inherit; text-decoration: none; }
 
 .category-list { display: grid; gap: 10px; }
 
+/* ─── 포스트 페이지 레이아웃 ──────────────────── */
+.post-layout {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 0;
+}
+
 /* ─── 포스트 상세 페이지 ──────────────────────── */
 .post-article {
   border-radius: var(--radius-2xl);
   background: var(--surface);
-  padding: clamp(24px, 4.5vw, 48px);
+  padding: clamp(28px, 5vw, 56px);
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 
 .post-article::before {
@@ -826,71 +840,88 @@ a { color: inherit; text-decoration: none; }
   top: 0; left: 0; right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--point) 0%, #6366f1 50%, #a855f7 100%);
-  background-size: 200% 100%;
-  animation: gradient-flow 3s ease-in-out infinite;
+  background-size: 300% 100%;
+  animation: gradient-flow 4s ease-in-out infinite;
 }
 
-.post-header h1 {
-  margin: 14px 0 12px;
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  line-height: 1.2;
-}
-
-.post-header > p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.75;
+/* 헤더 */
+.post-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .post-header__meta {
-  margin-top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px 14px;
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-.post-header__meta span {
   display: flex;
   align-items: center;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.post-meta-dot {
+  width: 3px; height: 3px;
+  background: var(--muted);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.post-header h1 {
+  font-size: clamp(1.75rem, 3.8vw, 2.6rem);
+  line-height: 1.22;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.post-header__desc {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  border-left: 3px solid var(--point-muted);
+  padding-left: 16px;
 }
 
 .tag-list {
   list-style: none;
-  margin: 14px 0 0; padding: 0;
+  margin: 0; padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
 }
 
 .tag-list li {
-  background: var(--point-soft);
-  color: var(--point);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
   border-radius: var(--radius-full);
   padding: 4px 12px;
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 600;
+  border: 1px solid var(--line);
   transition: all var(--transition);
   cursor: default;
 }
 
 .tag-list li:hover {
-  background: var(--point);
-  color: #fff;
+  background: var(--point-soft);
+  color: var(--point);
+  border-color: var(--point-muted);
 }
 
 /* ─── 포스트 본문 ─────────────────────────────── */
 .post-content {
-  margin-top: 28px;
+  margin-top: 36px;
   display: grid;
   gap: 0;
 }
 
 .post-content section {
-  padding: 24px 0;
+  padding: 32px 0;
   border-bottom: 1px solid var(--line-soft);
 }
 
@@ -898,28 +929,127 @@ a { color: inherit; text-decoration: none; }
 .post-content section:last-child { border-bottom: 0; padding-bottom: 0; }
 
 .post-content h2 {
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
-  margin-bottom: 10px;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  margin-bottom: 16px;
   color: var(--text);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
 }
 
-.post-content h2::before {
-  content: '';
-  display: inline-block;
-  width: 4px; height: 1em;
-  background: var(--point);
-  border-radius: 2px;
+.post-section-num {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--point);
+  background: var(--point-soft);
+  border-radius: 6px;
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
   flex-shrink: 0;
+  line-height: 1.6;
 }
 
 .post-content p {
+  margin: 0 0 1.1em;
+  color: #2D3748;
+  line-height: 1.95;
+  font-size: 1rem;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.post-content p:last-child { margin-bottom: 0; }
+
+/* ─── 목차 사이드바 ───────────────────────────── */
+.post-toc {
+  position: sticky;
+  top: calc(68px + 24px);
+}
+
+.post-toc__inner {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.post-toc__label {
   margin: 0;
-  color: #334155;
-  line-height: 1.85;
-  font-size: 0.97rem;
+  padding: 14px 16px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.post-toc__list {
+  list-style: none;
+  margin: 0; padding: 8px;
+  display: grid;
+  gap: 1px;
+}
+
+.post-toc__item a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.4;
+  transition: all var(--transition);
+}
+
+.post-toc__item a:hover {
+  background: var(--point-soft);
+  color: var(--point);
+}
+
+.post-toc__num {
+  width: 20px; height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: var(--surface-soft);
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.post-toc__item a:hover .post-toc__num {
+  background: var(--point);
+  color: #fff;
+}
+
+.post-toc__footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.post-toc__footer::before {
+  content: '⏱';
+  font-size: 0.8rem;
+}
+
+@media (max-width: 1040px) {
+  .post-layout {
+    grid-template-columns: 1fr;
+  }
+  .post-toc { display: none; }
 }
 
 /* ─── 페이저 ──────────────────────────────────── */

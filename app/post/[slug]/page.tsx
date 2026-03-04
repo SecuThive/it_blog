@@ -14,11 +14,7 @@ type PostPageProps = {
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
-
-  if (!post) {
-    return { title: '게시글 없음' }
-  }
-
+  if (!post) return { title: '게시글 없음' }
   return {
     title: `${post.title} | 오늘의 IT 블로그`,
     description: post.description,
@@ -28,10 +24,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params
   const post = await getPostBySlug(slug)
-
-  if (!post) {
-    notFound()
-  }
+  if (!post) notFound()
 
   const [relatedPosts, { prev, next }] = await Promise.all([
     getRelatedPosts(post.slug, post.category),
@@ -40,41 +33,86 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <div className="container post-page">
-      <article className="post-article">
-        <header className="post-header">
-          <span className="chip">{getCategoryLabel(post.category)}</span>
-          <h1>{post.title}</h1>
-          <p>{post.description}</p>
-          <div className="post-header__meta">
-            <span>{post.author}</span>
-            <span>{format(new Date(post.createdAt), 'PPP', { locale: ko })}</span>
-            <span>{post.readMinutes}분 읽기</span>
-          </div>
-          <ul className="tag-list">
-            {post.tags.map((tag) => (
-              <li key={tag}>#{tag}</li>
+
+      {/* 본문 + 목차 2단 레이아웃 */}
+      <div className="post-layout">
+
+        {/* ── 본문 ── */}
+        <article className="post-article animate-up">
+          <header className="post-header">
+            <div className="post-header__top">
+              <span className="chip">{getCategoryLabel(post.category)}</span>
+              <div className="post-header__meta">
+                <span>{post.author}</span>
+                <span className="post-meta-dot" />
+                <span>{format(new Date(post.createdAt), 'PPP', { locale: ko })}</span>
+                <span className="post-meta-dot" />
+                <span>{post.readMinutes}분 읽기</span>
+              </div>
+            </div>
+            <h1>{post.title}</h1>
+            <p className="post-header__desc">{post.description}</p>
+            {post.tags.length > 0 && (
+              <ul className="tag-list">
+                {post.tags.map((tag) => (
+                  <li key={tag}>#{tag}</li>
+                ))}
+              </ul>
+            )}
+          </header>
+
+          <div className="post-content">
+            {post.sections.map((section, idx) => (
+              <section key={section.heading} id={`section-${idx}`}>
+                <h2>
+                  <span className="post-section-num">{String(idx + 1).padStart(2, '0')}</span>
+                  {section.heading}
+                </h2>
+                {section.content
+                  .split('\n\n')
+                  .filter(Boolean)
+                  .map((para, pIdx) => (
+                    <p key={pIdx}>{para}</p>
+                  ))}
+              </section>
             ))}
-          </ul>
-        </header>
+          </div>
+        </article>
 
-        <div className="post-content">
-          {post.sections.map((section) => (
-            <section key={section.heading}>
-              <h2>{section.heading}</h2>
-              <p>{section.content}</p>
-            </section>
-          ))}
-        </div>
-      </article>
+        {/* ── 목차 사이드바 ── */}
+        {post.sections.length > 0 && (
+          <aside className="post-toc animate-up">
+            <div className="post-toc__inner">
+              <p className="post-toc__label">목차</p>
+              <nav>
+                <ol className="post-toc__list">
+                  {post.sections.map((section, idx) => (
+                    <li key={idx} className="post-toc__item">
+                      <a href={`#section-${idx}`}>
+                        <span className="post-toc__num">{idx + 1}</span>
+                        <span>{section.heading}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+              <div className="post-toc__footer">
+                <span>{post.readMinutes}분 읽기</span>
+              </div>
+            </div>
+          </aside>
+        )}
+      </div>
 
+      {/* ── 이전/다음 글 ── */}
       <section className="pager" aria-label="글 이동">
-        {next ? <Link href={`/post/${next.slug}`}>← 더 최신 글: {next.title}</Link> : <span />}
-        {prev ? <Link href={`/post/${prev.slug}`}>이전 글: {prev.title} →</Link> : <span />}
+        {next ? <Link href={`/post/${next.slug}`}>← {next.title}</Link> : <span />}
+        {prev ? <Link href={`/post/${prev.slug}`}>{prev.title} →</Link> : <span />}
       </section>
 
       <CommentSection slug={post.slug} />
 
-      {relatedPosts.length > 0 ? (
+      {relatedPosts.length > 0 && (
         <section className="related-posts" aria-label="관련 글">
           <h3>같은 카테고리의 다른 글</h3>
           <div className="related-posts__grid">
@@ -83,7 +121,7 @@ export default async function PostPage({ params }: PostPageProps) {
             ))}
           </div>
         </section>
-      ) : null}
+      )}
     </div>
   )
 }
