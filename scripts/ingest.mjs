@@ -241,6 +241,7 @@ async function buildDetailedKoreanPost(item, feed) {
     { heading: '구매 체크리스트', content: checklist },
     { heading: '살까 말까', content: prosCons },
     { heading: '한국 사용자 체크포인트', content: koreaChecklist },
+    { heading: '관련 악세사리 추천', content: '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.' },
     { heading: 'FAQ', content: faq },
     { heading: '결론', content: conclusion },
     { heading: '출처', content: sources },
