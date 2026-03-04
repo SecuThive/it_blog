@@ -15,16 +15,73 @@ async function fetchOgImage(url) {
       signal: ctrl.signal,
       headers: {
         'user-agent': 'Mozilla/5.0 (compatible; it_blog_ingest/1.0)',
-        'accept': 'text/html,application/xhtml+xml',
+        accept: 'text/html,application/xhtml+xml',
       },
     })
     clearTimeout(t)
     if (!res.ok) return null
     const html = await res.text()
-    const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
+    const m = html.match(
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    )
     if (m?.[1]) return m[1]
-    const m2 = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
+    const m2 = html.match(
+      /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    )
     return m2?.[1] || null
+  } catch {
+    return null
+  }
+}
+
+async function ensureBucket(bucket) {
+  // Best-effort: create if missing.
+  const { data: buckets } = await supabase.storage.listBuckets()
+  if (buckets?.some((b) => b.name === bucket)) return
+  await supabase.storage.createBucket(bucket, { public: true })
+}
+
+async function cacheCoverToStorage({ bucket, slug, sourceUrl, coverUrl }) {
+  // Prefer stable, non-hotlinked URLs.
+  const targetUrl = coverUrl || (await fetchOgImage(sourceUrl))
+  if (!targetUrl) return null
+
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 15000)
+    const res = await fetch(targetUrl, {
+      signal: ctrl.signal,
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; it_blog_ingest/1.0)',
+        accept: 'image/avif,image/webp,image/*,*/*;q=0.8',
+        referer: sourceUrl || undefined,
+      },
+    })
+    clearTimeout(t)
+    if (!res.ok) return null
+
+    const buf = Buffer.from(await res.arrayBuffer())
+    const contentType = res.headers.get('content-type') || 'image/jpeg'
+    const ext = contentType.includes('png')
+      ? 'png'
+      : contentType.includes('webp')
+        ? 'webp'
+        : contentType.includes('avif')
+          ? 'avif'
+          : 'jpg'
+
+    const key = `${slug}.${ext}`
+
+    await ensureBucket(bucket)
+
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(key, buf, { contentType, upsert: true, cacheControl: '3600' })
+
+    if (error) return null
+
+    const { data } = supabase.storage.from(bucket).getPublicUrl(key)
+    return data?.publicUrl || null
   } catch {
     return null
   }
@@ -99,7 +156,7 @@ async function buildDetailedKoreanPost(item, feed) {
   const sourceName = feed.name
   const sourceUrl = item.link || ''
   const publishedAt = item.isoDate || item.pubDate || ''
-  const coverImageUrl = item.enclosure?.url || (await fetchOgImage(sourceUrl))
+  const hotlinkCover = item.enclosure?.url || null
 
   const rawTitle = ensureText(item.title || '')
   const title = titleToKorean(rawTitle, feed.category || 'IT')
@@ -213,7 +270,7 @@ async function buildDetailedKoreanPost(item, feed) {
     description: `상세 요약/체크리스트: ${rawTitle || feed.category || 'IT'}`,
     category: feed.category || 'news',
     tags: ['it', 'news', feed.category || 'news', sourceName.replace(/\s+/g, '-')].slice(0, 6),
-    coverImageUrl,
+    hotlinkCover,
     sourceUrl,
     sections: [...baseSections, ...paddingSections],
   }
@@ -343,6 +400,13 @@ async function main() {
 
       const post = await buildDetailedKoreanPost(item, feed)
 
+      const coverImageUrl = await cacheCoverToStorage({
+        bucket: 'covers',
+        slug,
+        sourceUrl: post.sourceUrl,
+        coverUrl: post.hotlinkCover,
+      })
+
       // read_minutes heuristic (from your guide)
       const approxChars = post.sections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
       const readMinutes = Math.max(3, Math.ceil(Math.min(approxChars, 3000) / 300) + 1)
@@ -360,7 +424,7 @@ async function main() {
         featured: false,
         readMinutes,
         createdAt: publishedAt,
-        coverImageUrl: post.coverImageUrl,
+        coverImageUrl,
         sourceUrl: post.sourceUrl,
         sections: post.sections,
       })
