@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
 import Parser from 'rss-parser'
 import { createClient } from '@supabase/supabase-js'
+
+// Load Next.js-style local env file
+dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
