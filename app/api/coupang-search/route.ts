@@ -12,21 +12,29 @@ export async function GET(req: NextRequest) {
     return Response.json({ products: [] })
   }
 
-  const datetime = new Date()
-    .toISOString()
-    .replace(/[-:]/g, '')
-    .replace(/\.\d{3}/, '')
+  // 공식 문서 기준: yyMMdd'T'HHmmss'Z' (2자리 연도)
+  const now = new Date()
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  const datetime =
+    String(now.getUTCFullYear()).slice(-2) +
+    p2(now.getUTCMonth() + 1) +
+    p2(now.getUTCDate()) +
+    'T' +
+    p2(now.getUTCHours()) +
+    p2(now.getUTCMinutes()) +
+    p2(now.getUTCSeconds()) +
+    'Z'
 
-  const path =
-    `/v2/providers/affiliate_open_api/apis/openapi/products/search` +
-    `?keyword=${encodeURIComponent(keyword)}&limit=${limit}&subId=thivelab`
+  // path와 query를 분리 — 서명 메시지에는 '?' 없이 붙임
+  const urlPath = '/v2/providers/affiliate_open_api/apis/openapi/products/search'
+  const query = `keyword=${encodeURIComponent(keyword)}&limit=${limit}&subId=thivelab`
 
   const signature = createHmac('sha256', SECRET_KEY)
-    .update(`${datetime}GET${path}`)
+    .update(`${datetime}GET${urlPath}${query}`)
     .digest('hex')
 
   try {
-    const res = await fetch(`https://api-gateway.coupang.com${path}`, {
+    const res = await fetch(`https://api-gateway.coupang.com${urlPath}?${query}`, {
       headers: {
         Authorization: `CEA algorithm=HmacSHA256, access-key=${ACCESS_KEY}, signed-date=${datetime}, signature=${signature}`,
         'Content-Type': 'application/json; charset=UTF-8',

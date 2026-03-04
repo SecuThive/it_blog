@@ -36,8 +36,22 @@ export default function CoupangProducts({ keyword }: { keyword: string }) {
   }
 
   if (!products.length) {
+    const searchUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}&channel=user`
     return (
-      <p className="coupang-empty">현재 관련 상품을 불러올 수 없습니다.</p>
+      <div className="coupang-fallback">
+        <p className="coupang-fallback__desc">관련 상품을 쿠팡에서 직접 검색해 보세요.</p>
+        <a
+          href={searchUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          className="coupang-fallback__btn"
+        >
+          쿠팡에서 &quot;{keyword}&quot; 검색하기 →
+        </a>
+        <p className="coupang-products__notice">
+          이 링크는 쿠팡 파트너스 제휴 링크로, 구매 시 일정 수수료가 발생할 수 있습니다.
+        </p>
+      </div>
     )
   }
 
