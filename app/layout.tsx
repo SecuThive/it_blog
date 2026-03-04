@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
 import Navbar from './components/Navbar'
+import AnimationInit from './components/AnimationInit'
+import DynamicUI from './components/DynamicUI'
 import { getPostCategorySummaries } from './lib/posts'
 
 export const metadata: Metadata = {
@@ -18,12 +20,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;700&display=swap"
           rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
       <body>
         <div className="page-bg" />
+        <AnimationInit />
+        <DynamicUI />
         <Navbar />
         <main className="page-main">{children}</main>
 

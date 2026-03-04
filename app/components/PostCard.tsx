@@ -13,7 +13,7 @@ export default function PostCard({ post, compact = false }: PostCardProps) {
   const categoryLabel = getCategoryLabel(post.category)
 
   return (
-    <article className={compact ? 'post-card post-card--compact' : 'post-card'}>
+    <article className={compact ? 'post-card post-card--compact animate-up' : 'post-card animate-up'}>
       <Link href={`/post/${post.slug}`} className={`post-card__cover post-card__cover--${post.category}`}>
         <span>{categoryLabel}</span>
       </Link>
