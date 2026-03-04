@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 
   return {
-    title: `${summary.name} | 오늘의 IT 블로그`,
+    title: `${summary.name} | ThiveLab`,
     description: summary.description,
   }
 }

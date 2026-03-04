@@ -1,7 +1,7 @@
 import { getAllPosts } from '../lib/posts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
-const SITE_NAME = '오늘의 IT 블로그'
+const SITE_NAME = 'ThiveLab'
 const SITE_DESC = '스마트폰, 노트북, 태블릿, IT 액세서리 리뷰와 구매가이드'
 
 export async function GET() {

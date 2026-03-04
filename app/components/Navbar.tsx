@@ -29,8 +29,8 @@ export default async function Navbar() {
       {/* 메인 헤더 */}
       <div className="main-header">
         <div className="site-header__inner main-header__inner">
-          <Link href="/" className="brand" aria-label="오늘의 IT 블로그 홈">
-            오늘의 IT 블로그
+          <Link href="/" className="brand" aria-label="ThiveLab 홈">
+            ThiveLab
           </Link>
 
           <nav aria-label="메인 메뉴" className="main-nav">

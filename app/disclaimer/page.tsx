@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '광고·제휴 고지 | 오늘의 IT 블로그',
-  description: '오늘의 IT 블로그의 광고 수익 구조, 협찬 정책, 제휴 링크 사용에 관한 고지입니다.',
+  title: '광고·제휴 고지 | ThiveLab',
+  description: 'ThiveLab의 광고 수익 구조, 협찬 정책, 제휴 링크 사용에 관한 고지입니다.',
 }
 
 export default function DisclaimerPage() {
@@ -19,7 +19,7 @@ export default function DisclaimerPage() {
         <section className="info-doc__section">
           <h2>1. 광고 수익 안내</h2>
           <p>
-            오늘의 IT 블로그는 블로그 운영비 충당을 위해 다음과 같은 방법으로 광고 수익을
+            ThiveLab는 블로그 운영비 충당을 위해 다음과 같은 방법으로 광고 수익을
             얻을 수 있습니다.
           </p>
           <ul>

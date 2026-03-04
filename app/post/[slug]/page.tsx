@@ -58,8 +58,8 @@ export default async function PostPage({ params }: PostPageProps) {
     headline: post.title,
     description: post.description,
     datePublished: post.createdAt,
-    author: { '@type': 'Organization', name: '오늘의 IT 블로그' },
-    publisher: { '@type': 'Organization', name: '오늘의 IT 블로그', url: SITE_URL },
+    author: { '@type': 'Organization', name: 'ThiveLab' },
+    publisher: { '@type': 'Organization', name: 'ThiveLab', url: SITE_URL },
     url: `${SITE_URL}/post/${post.slug}`,
     ...(post.coverImageUrl ? { image: post.coverImageUrl } : {}),
   }

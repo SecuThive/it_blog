@@ -8,7 +8,7 @@ import CookieBanner from './components/CookieBanner'
 import { getPostCategorySummaries } from './lib/posts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
-const SITE_NAME = '오늘의 IT 블로그'
+const SITE_NAME = 'ThiveLab'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: '스마트폰, 노트북, 태블릿, IT 액세서리 리뷰와 구매가이드를 다루는 블로그',
+  description: 'AI가 큐레이션하는 IT 인사이트 — 스마트폰, 노트북, 태블릿, 액세서리 리뷰와 구매가이드',
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
@@ -60,11 +60,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             {/* 브랜드 컬럼 */}
             <div className="footer-brand-col">
               <Link href="/" className="footer-brand">
-                오늘의 IT 블로그
+                ThiveLab
               </Link>
               <p className="footer-brand-desc">
-                스마트폰·노트북·태블릿·IT 액세서리를 직접 구매하고 사용한 경험을 바탕으로
-                솔직한 리뷰와 구매 가이드를 제공합니다.
+                AI가 수집·분석한 최신 IT 정보를 사람 에디터가 검수해 제공하는
+                AI 기반 IT 큐레이션 미디어입니다.
               </p>
               <p className="footer-ai-notice">
                 🤖 이 블로그는 AI가 콘텐츠를 수집·작성하고 사람 에디터가 검수합니다.
@@ -103,7 +103,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           {/* 하단 바 */}
           <div className="footer-bottom">
             <div className="container footer-bottom__inner">
-              <p>© 2026 오늘의 IT 블로그. All rights reserved.</p>
+              <p>© 2026 ThiveLab. All rights reserved.</p>
               <div className="footer-bottom__links">
                 <Link href="/terms">이용약관</Link>
                 <span aria-hidden="true">·</span>

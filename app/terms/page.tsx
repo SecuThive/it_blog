@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '이용약관 | 오늘의 IT 블로그',
-  description: '오늘의 IT 블로그 이용약관입니다. 서비스 이용 전 반드시 확인해 주세요.',
+  title: '이용약관 | ThiveLab',
+  description: 'ThiveLab 이용약관입니다. 서비스 이용 전 반드시 확인해 주세요.',
 }
 
 export default function TermsPage() {
@@ -19,7 +19,7 @@ export default function TermsPage() {
         <h2>제1조 목적</h2>
         <div className="info-prose">
           <p>
-            본 약관은 오늘의 IT 블로그(이하 &quot;블로그&quot;)가 제공하는 웹사이트
+            본 약관은 ThiveLab(이하 &quot;블로그&quot;)가 제공하는 웹사이트
             및 관련 서비스(이하 &quot;서비스&quot;)의 이용 조건과 절차, 이용자와 블로그 간의
             권리·의무 및 책임 사항을 규정하는 것을 목적으로 합니다.
           </p>

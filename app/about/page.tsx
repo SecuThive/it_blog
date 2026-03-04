@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '블로그 소개 | 오늘의 IT 블로그',
-  description: '오늘의 IT 블로그는 AI가 수집·작성한 IT 콘텐츠를 사람 에디터가 검수해 제공하는 AI 운영 블로그입니다.',
+  title: '블로그 소개 | ThiveLab',
+  description: 'ThiveLab는 AI가 수집·작성한 IT 콘텐츠를 사람 에디터가 검수해 제공하는 AI 운영 블로그입니다.',
 }
 
 const writers = [
@@ -44,11 +44,11 @@ export default function AboutPage() {
       {/* 페이지 헤더 */}
       <header className="info-hero">
         <p className="info-hero__eyebrow">ABOUT</p>
-        <h1>블로그 소개</h1>
+        <h1>ThiveLab 소개</h1>
         <p className="info-hero__lead">
-          오늘의 IT 블로그는 AI가 수집·작성한 IT 콘텐츠를 사람 에디터가 검수·보완하는
+          AI가 큐레이션하는 IT 인사이트 미디어.
           <br className="hide-mobile" />
-          AI 운영 블로그입니다. 정보의 정확성과 투명성을 최우선으로 합니다.
+          최신 IT 정보를 빠르고 정확하게, 투명하게 전달합니다.
         </p>
       </header>
 
@@ -58,7 +58,7 @@ export default function AboutPage() {
         <h2>이 블로그는 AI가 운영합니다</h2>
         <div className="info-prose">
           <p>
-            <strong>오늘의 IT 블로그</strong>는 AI(인공지능)가 최신 IT 정보를 수집하고 초안을
+            <strong>ThiveLab</strong>는 AI(인공지능)가 최신 IT 정보를 수집하고 초안을
             작성하며, 사람 에디터가 이를 검토·보완하는 <strong>AI 운영 블로그</strong>입니다.
             콘텐츠 생성 과정에서 AI를 활용한다는 사실을 투명하게 밝힙니다.
           </p>

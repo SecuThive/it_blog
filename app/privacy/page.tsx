@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '개인정보처리방침 | 오늘의 IT 블로그',
-  description: '오늘의 IT 블로그 개인정보처리방침입니다.',
+  title: '개인정보처리방침 | ThiveLab',
+  description: 'ThiveLab 개인정보처리방침입니다.',
 }
 
 export default function PrivacyPage() {
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         <section className="info-doc__section">
           <h2>1. 개인정보 수집 항목 및 수집 방법</h2>
           <p>
-            오늘의 IT 블로그(이하 &quot;블로그&quot;)는 다음과 같은 개인정보를 수집할 수 있습니다.
+            ThiveLab(이하 &quot;블로그&quot;)는 다음과 같은 개인정보를 수집할 수 있습니다.
           </p>
           <ul>
             <li>
@@ -130,7 +130,7 @@ export default function PrivacyPage() {
           <h2>8. 개인정보 보호 책임자</h2>
           <ul>
             <li>
-              <strong>운영자:</strong> 오늘의 IT 블로그 편집팀
+              <strong>운영자:</strong> ThiveLab 편집팀
             </li>
             <li>
               <strong>문의:</strong> <Link href="/contact">문의 페이지</Link> 이용

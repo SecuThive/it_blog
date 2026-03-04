@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '문의하기 | 오늘의 IT 블로그',
+  title: '문의하기 | ThiveLab',
   description: '블로그 관련 문의, 오류 제보, 제품 협찬 제안은 이 페이지를 통해 남겨주세요.',
 }
 
