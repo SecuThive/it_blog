@@ -1294,6 +1294,18 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.7;
 }
 
+.footer-ai-notice {
+  margin: 0 0 8px;
+  color: var(--point);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.6;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--point) 8%, transparent);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--point);
+}
+
 .footer-ad-notice {
   margin: 0;
   color: var(--muted);
@@ -1445,6 +1457,38 @@ a { color: inherit; text-decoration: none; }
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 0.84rem;
+}
+
+/* AI 운영 공개 섹션 */
+.info-ai-notice {
+  background: color-mix(in srgb, var(--point) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--point) 25%, transparent);
+  border-radius: var(--radius-xl);
+  padding: clamp(20px, 3vw, 32px);
+  margin-bottom: 32px;
+}
+
+.info-ai-notice h2 {
+  color: var(--point);
+  margin-bottom: 12px !important;
+}
+
+.info-ai-notice h2::before {
+  background: var(--point) !important;
+}
+
+.ai-notice-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: var(--point);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
 }
 
 .info-section { margin-bottom: 32px; }

@@ -43,6 +43,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 스마트폰·노트북·태블릿·IT 액세서리를 직접 구매하고 사용한 경험을 바탕으로
                 솔직한 리뷰와 구매 가이드를 제공합니다.
               </p>
+              <p className="footer-ai-notice">
+                🤖 이 블로그는 AI가 콘텐츠를 수집·작성하고 사람 에디터가 검수합니다.
+              </p>
               <p className="footer-ad-notice">
                 이 블로그는 쿠팡 파트너스 등 제휴 마케팅을 통해 수익을 얻을 수 있습니다.
               </p>
