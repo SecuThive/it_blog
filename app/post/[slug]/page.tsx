@@ -22,6 +22,16 @@ function cleanHeading(heading: string) {
   return heading.replace(/\(SEO[^)]*\)/gi, '').trim()
 }
 
+// 제목에서 앞 3단어만 추출해 쿠팡 검색 키워드로 사용
+function deriveSearchKeyword(title: string): string {
+  return title
+    .replace(/[·:·\-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(' ')
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
@@ -115,7 +125,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 </h2>
                 <div className="post-md">
                   {section.heading.includes('대체재') || section.heading.includes('비교 프레임') ? (
-                    <CoupangProducts keyword={post.title} />
+                    <CoupangProducts keyword={deriveSearchKeyword(post.title)} />
                   ) : section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
                     <FaqAccordion text={section.content} />
                   ) : (
