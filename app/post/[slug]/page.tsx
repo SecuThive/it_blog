@@ -7,6 +7,7 @@ import CommentSection from '../../components/CommentSection'
 import PostCard from '../../components/PostCard'
 import FaqAccordion from '../../components/FaqAccordion'
 import PostToc from '../../components/PostToc'
+import CoupangProducts from '../../components/CoupangProducts'
 import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
 
 import ReactMarkdown from 'react-markdown'
@@ -113,7 +114,9 @@ export default async function PostPage({ params }: PostPageProps) {
                   {cleanHeading(section.heading)}
                 </h2>
                 <div className="post-md">
-                  {section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
+                  {section.heading.includes('대체재') || section.heading.includes('비교 프레임') ? (
+                    <CoupangProducts keyword={post.title} />
+                  ) : section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
                     <FaqAccordion text={section.content} />
                   ) : (
                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
