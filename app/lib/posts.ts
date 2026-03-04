@@ -18,6 +18,8 @@ export type Post = {
   readMinutes: number
   author: string
   featured?: boolean
+  coverImageUrl?: string | null
+  sourceUrl?: string | null
   sections: PostSection[]
 }
 
@@ -54,6 +56,8 @@ function rowToPost(row: Record<string, unknown>, sections: Record<string, unknow
     readMinutes: Number(row.read_minutes),
     author: String(row.author),
     featured: Boolean(row.featured),
+    coverImageUrl: row.cover_image_url ? String(row.cover_image_url) : null,
+    sourceUrl: row.source_url ? String(row.source_url) : null,
     sections: sections
       .filter((s) => Number(s.post_id) === Number(row.id))
       .sort((a, b) => Number(a.position) - Number(b.position))

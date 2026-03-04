@@ -6,6 +6,30 @@ import path from 'node:path'
 import Parser from 'rss-parser'
 import { createClient } from '@supabase/supabase-js'
 
+async function fetchOgImage(url) {
+  if (!url) return null
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 12000)
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; it_blog_ingest/1.0)',
+        'accept': 'text/html,application/xhtml+xml',
+      },
+    })
+    clearTimeout(t)
+    if (!res.ok) return null
+    const html = await res.text()
+    const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
+    if (m?.[1]) return m[1]
+    const m2 = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i)
+    return m2?.[1] || null
+  } catch {
+    return null
+  }
+}
+
 // Load Next.js-style local env file
 dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
@@ -60,10 +84,11 @@ function titleToKorean(titleEn, fallbackCategory) {
   return `${t} — 핵심 변경점 요약과 구매 체크포인트`
 }
 
-function buildDetailedKoreanPost(item, feed) {
+async function buildDetailedKoreanPost(item, feed) {
   const sourceName = feed.name
   const sourceUrl = item.link || ''
   const publishedAt = item.isoDate || item.pubDate || ''
+  const coverImageUrl = item.enclosure?.url || (await fetchOgImage(sourceUrl))
 
   const rawTitle = ensureText(item.title || '')
   const title = titleToKorean(rawTitle, feed.category || 'IT')
@@ -128,22 +153,48 @@ function buildDetailedKoreanPost(item, feed) {
     .filter(Boolean)
     .join('\n')
 
+  const baseSections = [
+    { heading: 'TL;DR', content: tldr },
+    { heading: '핵심 체크 표', content: specTable },
+    { heading: '살 이유 / 안 살 이유', content: buyReasons },
+    { heading: '한국 사용자 체크포인트', content: koreaChecklist },
+    { heading: 'FAQ', content: faq },
+    { heading: '결론', content: conclusion },
+    { heading: '출처', content: sources },
+  ]
+
+  // Ensure minimum readable length (~3000+ chars) by appending extra FAQ/checklist
+  const currentLen = baseSections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
+  const paddingSections = []
+  if (currentLen < 3200) {
+    paddingSections.push({
+      heading: '구매 전 최종 체크(10문 10답)',
+      content: [
+        '- 지금 기기의 가장 불편한 점은 무엇인가?',
+        '- 그 불편함이 “새 모델”에서 해결되는가?',
+        '- 한국 정발/AS/보증 조건은 확실한가?',
+        '- 예산 상한선(총 비용: 기기+보증+액세서리)은?',
+        '- 1~2개월 기다리면 더 좋은 조건(할인/번들)이 나올 가능성은?',
+        '- 저장공간(SSD)과 메모리는 내 사용패턴에 충분한가?',
+        '- 포트/충전/외부 디스플레이 등 주변기기 호환은?',
+        '- 배터리/휴대성/무게가 내 사용환경에 중요한가?',
+        '- 중고로 되팔 계획이 있다면 인기 옵션 조합은?',
+        '- 결론: 지금 필요한가(Need) vs 갖고 싶은가(Want)?',
+      ].join('\n'),
+    })
+  }
+
   return {
     title,
     description: `상세 요약/체크리스트: ${rawTitle || feed.category || 'IT'}`,
     category: feed.category || 'news',
     tags: ['it', 'news', feed.category || 'news', sourceName.replace(/\s+/g, '-')].slice(0, 6),
-    sections: [
-      { heading: 'TL;DR', content: tldr },
-      { heading: '핵심 체크 표', content: specTable },
-      { heading: '살 이유 / 안 살 이유', content: buyReasons },
-      { heading: '한국 사용자 체크포인트', content: koreaChecklist },
-      { heading: 'FAQ', content: faq },
-      { heading: '결론', content: conclusion },
-      { heading: '출처', content: sources },
-    ],
+    coverImageUrl,
+    sourceUrl,
+    sections: [...baseSections, ...paddingSections],
   }
 }
+
 
 async function ensureIngestTables() {
   const { error } = await supabase.from('ingest_sources').select('id').limit(1)
@@ -188,7 +239,7 @@ async function markIngested({ sourceId, url, title, publishedAt }) {
   if (error) throw error
 }
 
-async function createPost({ slug, title, description, category, tags, author, featured, readMinutes, createdAt, sections }) {
+async function createPost({ slug, title, description, category, tags, author, featured, readMinutes, createdAt, coverImageUrl, sourceUrl, sections }) {
   const { data: postRow, error: postError } = await supabase
     .from('posts')
     .insert({
@@ -201,6 +252,8 @@ async function createPost({ slug, title, description, category, tags, author, fe
       featured,
       read_minutes: readMinutes,
       created_at: createdAt,
+      cover_image_url: coverImageUrl || null,
+      source_url: sourceUrl || null,
     })
     .select('id')
     .single()
@@ -241,7 +294,7 @@ async function main() {
 
       const publishedAt = isoDate(item.isoDate || item.pubDate || new Date())
 
-      const post = buildDetailedKoreanPost(item, feed)
+      const post = await buildDetailedKoreanPost(item, feed)
 
       const baseSlug = toSlug(item.title || url) || toSlug(url)
       const slug = `${baseSlug}-${new Date(publishedAt).toISOString().slice(0, 10)}`
@@ -256,6 +309,8 @@ async function main() {
         featured: false,
         readMinutes: 5,
         createdAt: publishedAt,
+        coverImageUrl: post.coverImageUrl,
+        sourceUrl: post.sourceUrl,
         sections: post.sections,
       })
 

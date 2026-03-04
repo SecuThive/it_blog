@@ -14,7 +14,19 @@ export default function PostCard({ post, compact = false }: PostCardProps) {
 
   return (
     <article className={compact ? 'post-card post-card--compact animate-up' : 'post-card animate-up'}>
-      <Link href={`/post/${post.slug}`} className={`post-card__cover post-card__cover--${post.category}`}>
+      <Link
+        href={`/post/${post.slug}`}
+        className={`post-card__cover post-card__cover--${post.category}`}
+        style={
+          post.coverImageUrl
+            ? {
+                backgroundImage: `url(${post.coverImageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }
+            : undefined
+        }
+      >
         <span>{categoryLabel}</span>
       </Link>
       <div className="post-card__top">
