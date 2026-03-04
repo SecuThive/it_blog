@@ -79,9 +79,20 @@ function ensureText(s) {
 
 function titleToKorean(titleEn, fallbackCategory) {
   const t = ensureText(titleEn)
-  // minimal heuristic: keep English product names, add Korean framing
   if (!t) return `${fallbackCategory} 최신 업데이트`
-  return `${t} — 핵심 변경점 요약과 구매 체크포인트`
+
+  // Heuristic headline rewrite (Korean framing, keep product names)
+  let head = t
+  head = head.replace(/^Apple introduces\s+/i, '')
+  head = head.replace(/^Apple announces\s+/i, '')
+  head = head.replace(/^Apple unveils\s+/i, '')
+  head = head.replace(/^Google announces\s+/i, '')
+  head = head.replace(/^Microsoft announces\s+/i, '')
+
+  // Keep it short-ish
+  head = head.slice(0, 90)
+
+  return `${head} 정리: 핵심 포인트와 구매 체크리스트`
 }
 
 async function buildDetailedKoreanPost(item, feed) {
@@ -93,54 +104,67 @@ async function buildDetailedKoreanPost(item, feed) {
   const rawTitle = ensureText(item.title || '')
   const title = titleToKorean(rawTitle, feed.category || 'IT')
 
-  const tldr = [
-    `- 발표/업데이트: ${rawTitle || '공식 발표'}`,
-    `- 요약: 핵심 변화와 실사용/구매 관점 체크포인트를 정리했습니다.`,
-    `- 누구에게 유용?: 신제품 구매 예정자 / 기존 사용자 / 업무용 사용자`,
-    `- 다음 액션: 아래 체크리스트로 본인 상황에 맞게 판단하세요.`,
-  ].join('\n')
-
-  const specTable = [
-    '체크리스트 (핵심만)',
-    '- ☐ 무엇이 바뀌었나: 핵심 변경 포인트 3~5개 확인',
-    '- ☐ 가격/출시: 한국 출시/가격/프로모션 여부 확인',
-    '- ☐ 이전 모델 대비: 업그레이드 체감 포인트 확인',
-    '- ☐ 경쟁 제품 대비: 대체재 대비 장단점 비교',
-  ].join('\n')
-
-  const buyReasons = [
-    '**살 이유 (추천)**',
-    '- 성능/배터리/카메라 등 “체감”이 있는 업그레이드인지',
-    '- 가격 대비 체감 개선이 있는지',
-    '- 한국 정발/AS/부품 수급이 안정적인지',
+  const summary = [
+    `발표/업데이트: ${rawTitle || '공식 발표'}`,
     '',
-    '**안 살 이유 (보류)**',
-    '- 초기 가격이 높고 2~3개월 내 할인 가능성이 있는지',
-    '- 1세대 이슈(발열/펌웨어)가 우려되는지',
-    '- 지금 쓰는 기기에서 체감이 거의 없을지',
+    '한 줄 요약: 핵심 변화 포인트를 정리하고, “지금 구매 vs 대기” 판단 체크리스트를 제공합니다.',
+    '',
+    '추천 대상(빠르게 보기)',
+    '- 지금 기기에서 불편함이 명확한 사람(배터리/속도/휴대성)',
+    '- 새 학기/업무 일정 등으로 구매 시점이 정해진 사람',
+    '',
+    '보류 대상(잠깐 대기)',
+    '- 한국 가격/출시/프로모션이 확정되기 전이라면 한 번 더 비교',
+  ].join('\n')
+
+  const keyPoints = [
+    '핵심 포인트(3분 컷)',
+    '1) 무엇이 바뀌었나 — “체감”이 생길 변화인지 확인',
+    '2) 가격/출시 — 한국 정발/가격/프로모션 확정 여부',
+    '3) 업그레이드 가치 — 내 병목(RAM/SSD/배터리/발열) 해결 여부',
+    '4) 대체재 — 같은 예산대 후보(이전 세대/경쟁 제품)와 비교',
+  ].join('\n')
+
+  const checklist = [
+    '구매 체크리스트(체크하고 결론 내리기)',
+    '- ☐ 한국 출시일/가격/구성이 확정됐나?',
+    '- ☐ AppleCare+/AS 조건이 내 기준에 맞나?',
+    '- ☐ 내 사용패턴에서 병목이 뭔지 확실한가? (RAM/SSD/배터리/발열)',
+    '- ☐ 옵션 구성(메모리/저장공간)을 과소/과대 선택하지 않았나?',
+    '- ☐ 직구 vs 정발 총비용(환율/관부가세/보증)을 계산했나?',
+  ].join('\n')
+
+  const prosCons = [
+    '**살까 말까(빠른 판단)**',
+    '',
+    '**추천(사는 쪽)**',
+    '- 지금 기기 불편이 명확하고, 당장 교체가 필요한 경우',
+    '- 배터리/휴대성/소음/발열 등 “생활 불편”이 큰 경우',
+    '',
+    '**보류(기다리는 쪽)**',
+    '- 한국 가격/출시/프로모션이 아직 불확실한 경우',
+    '- 급하지 않아서 4~8주 가격 흐름을 볼 수 있는 경우',
   ].join('\n')
 
   const koreaChecklist = [
-    '- 한국 사용자 체크포인트',
-    '  - 정발 여부 / 출시일 / 사전예약 혜택',
-    '  - 애플케어/AS 정책, 교체비용, 수리 기간',
-    '  - 통신/규격(충전, Wi‑Fi/5G band, 전파인증 등)',
-    '  - 직구 vs 정발: 총비용/보증 비교',
+    '한국 사용자 체크포인트',
+    '- 정발 여부 / 출시일 / 사전예약 혜택',
+    '- AppleCare+ / AS 정책, 수리 기간, 교체 비용',
+    '- 충전/허브/외부 모니터 등 주변기기 호환',
+    '- 직구 vs 정발: 총비용/보증 차이',
   ].join('\n')
 
   const faq = [
-    '**FAQ(짧게)**',
-    '- 지금 사도 되나요, 기다릴까요? → 당장 필요하면 구매, 여유가 있으면 한국 가격/프로모션 확정 후 결정이 안전합니다.',
-    '- 이전 모델에서 업그레이드 가치가 있나요? → CPU보다 RAM/SSD/배터리 상태가 체감에 더 큰 경우가 많습니다.',
-    '- 한국 정발/AS는 어떻게 되나요? → 정발 여부/출시일/AS 정책을 먼저 확인하세요.',
-    '- 경쟁 제품 대비 장단점은? → 같은 가격대 대체재와 핵심 항목(휴대성/배터리/AS)을 비교하세요.',
-    '- 실사용에서 가장 체감되는 변화는? → 내 병목(메모리/저장공간/배터리/발열) 해결 여부입니다.',
+    'FAQ(짧게)',
+    '- 지금 사도 되나요? → 당장 필요하면 구매, 여유가 있으면 한국 조건 확정 후 결정이 안전합니다.',
+    '- 업그레이드 가치가 있나요? → CPU보다 RAM/SSD/배터리 상태가 체감에 큰 경우가 많습니다.',
+    '- 옵션은 어떻게 고르나요? → “RAM 부족 스트레스”면 메모리, “항상 꽉 참”이면 저장공간 우선.',
   ].join('\n')
 
   const conclusion = [
-    '**결론**',
-    '이 글은 원문을 복사하지 않고, 공식 발표를 바탕으로 “구매/사용 판단”에 도움이 되도록 재구성한 요약+체크리스트입니다.',
-    '의견이나 추가 질문이 있으면 댓글로 남겨주세요. 다음 업데이트에 반영할게요.',
+    '결론',
+    '이번 발표는 “모두에게 체감”이 아니라, 내 병목을 해결하는 사람에게 가치가 큽니다.',
+    '댓글로 용도(문서/개발/영상)만 남겨주면 옵션 선택(메모리/저장공간)을 더 구체적으로 추천할게요.',
   ].join('\n')
 
   const sources = [
@@ -153,9 +177,10 @@ async function buildDetailedKoreanPost(item, feed) {
     .join('\n')
 
   const baseSections = [
-    { heading: '요약', content: tldr },
-    { heading: '핵심 체크리스트', content: specTable },
-    { heading: '살까 말까', content: buyReasons },
+    { heading: '요약', content: summary },
+    { heading: '핵심 포인트', content: keyPoints },
+    { heading: '구매 체크리스트', content: checklist },
+    { heading: '살까 말까', content: prosCons },
     { heading: '한국 사용자 체크포인트', content: koreaChecklist },
     { heading: 'FAQ', content: faq },
     { heading: '결론', content: conclusion },
