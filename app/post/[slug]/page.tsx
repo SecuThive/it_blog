@@ -5,6 +5,7 @@ import { ko } from 'date-fns/locale'
 import { notFound } from 'next/navigation'
 import CommentSection from '../../components/CommentSection'
 import PostCard from '../../components/PostCard'
+import FaqAccordion from '../../components/FaqAccordion'
 import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
 
 import ReactMarkdown from 'react-markdown'
@@ -79,9 +80,13 @@ export default async function PostPage({ params }: PostPageProps) {
                   {section.heading}
                 </h2>
                 <div className="post-md">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-                    {section.content}
-                  </ReactMarkdown>
+                  {section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
+                    <FaqAccordion text={section.content} />
+                  ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                      {section.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
