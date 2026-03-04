@@ -1,4 +1,10 @@
 import { NextResponse } from 'next/server'
+
+export async function POST() {
+  return NextResponse.json({ error: 'Not found' }, { status: 404 })
+}
+
+/*
 import { recordDepositedDonation } from '../../../lib/donations'
 
 export async function POST(request: Request) {
@@ -36,3 +42,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: reason }, { status: 400 })
   }
 }
+*/

@@ -1,4 +1,10 @@
 import { NextResponse } from 'next/server'
+
+export async function POST() {
+  return NextResponse.json({ error: 'Not found' }, { status: 404 })
+}
+
+/*
 import { recordDepositedDonation } from '../../../lib/donations'
 
 export async function POST(request: Request) {
@@ -35,7 +41,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    const reason = error instanceof Error ? error.message : '웹훅 처리 실패'
     return NextResponse.json({ error: reason }, { status: 400 })
   }
 }
+*/
