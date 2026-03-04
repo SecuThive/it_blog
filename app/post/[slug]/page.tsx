@@ -20,13 +20,25 @@ function cleanHeading(heading: string) {
   return heading.replace(/\(SEO[^)]*\)/gi, '').trim()
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
+
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
-  if (!post) return { title: '게시글 없음' }
+  if (!post) return { title: '게시글 없음', robots: { index: false } }
   return {
-    title: `${post.title} | 오늘의 IT 블로그`,
+    title: post.title,
     description: post.description,
+    alternates: { canonical: `${SITE_URL}/post/${post.slug}` },
+    openGraph: {
+      type: 'article',
+      title: post.title,
+      description: post.description,
+      url: `${SITE_URL}/post/${post.slug}`,
+      publishedTime: post.createdAt,
+      tags: post.tags,
+      ...(post.coverImageUrl ? { images: [{ url: post.coverImageUrl, alt: post.title }] } : {}),
+    },
   }
 }
 
@@ -40,8 +52,24 @@ export default async function PostPage({ params }: PostPageProps) {
     getPrevNextPost(post.slug),
   ])
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.createdAt,
+    author: { '@type': 'Organization', name: '오늘의 IT 블로그' },
+    publisher: { '@type': 'Organization', name: '오늘의 IT 블로그', url: SITE_URL },
+    url: `${SITE_URL}/post/${post.slug}`,
+    ...(post.coverImageUrl ? { image: post.coverImageUrl } : {}),
+  }
+
   return (
     <div className="container post-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 본문 + 목차 2단 레이아웃 */}
       <div className="post-layout">
         {/* ── 본문 ── */}

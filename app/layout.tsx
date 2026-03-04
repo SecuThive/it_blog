@@ -4,11 +4,33 @@ import './globals.css'
 import Navbar from './components/Navbar'
 import AnimationInit from './components/AnimationInit'
 import DynamicUI from './components/DynamicUI'
+import CookieBanner from './components/CookieBanner'
 import { getPostCategorySummaries } from './lib/posts'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
+const SITE_NAME = '오늘의 IT 블로그'
+
 export const metadata: Metadata = {
-  title: '오늘의 IT 블로그',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
   description: '스마트폰, 노트북, 태블릿, IT 액세서리 리뷰와 구매가이드를 다루는 블로그',
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'ko_KR',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    types: {
+      'application/rss+xml': `${SITE_URL}/feed.xml`,
+    },
+  },
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -28,6 +50,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <div className="page-bg" />
         <AnimationInit />
         <DynamicUI />
+        <CookieBanner />
         <Navbar />
         <main className="page-main">{children}</main>
 
@@ -69,6 +92,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               <h3>블로그 정보</h3>
               <ul>
                 <li><Link href="/about">블로그 소개</Link></li>
+                <li><Link href="/terms">이용약관</Link></li>
                 <li><Link href="/disclaimer">광고·제휴 고지</Link></li>
                 <li><Link href="/privacy">개인정보처리방침</Link></li>
                 <li><Link href="/contact">문의하기</Link></li>
@@ -81,6 +105,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <div className="container footer-bottom__inner">
               <p>© 2026 오늘의 IT 블로그. All rights reserved.</p>
               <div className="footer-bottom__links">
+                <Link href="/terms">이용약관</Link>
+                <span aria-hidden="true">·</span>
                 <Link href="/privacy">개인정보처리방침</Link>
                 <span aria-hidden="true">·</span>
                 <Link href="/disclaimer">광고 고지</Link>

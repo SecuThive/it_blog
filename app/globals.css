@@ -1466,6 +1466,55 @@ a { color: inherit; text-decoration: none; }
 
 .footer-bottom__links a:hover { color: var(--point); }
 
+/* ─── 쿠키 동의 배너 ─────────────────────────── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(0,0,0,.08);
+  padding: 14px 0;
+}
+
+.cookie-banner__inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gap);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cookie-banner__text {
+  margin: 0;
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cookie-banner__link { color: var(--point); font-weight: 600; text-decoration: underline; }
+
+.cookie-banner__actions { flex-shrink: 0; }
+
+.cookie-banner__accept {
+  padding: 8px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--point);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.cookie-banner__accept:hover { opacity: 0.85; }
+
 /* ─── 404 페이지 ──────────────────────────────── */
 .not-found-page { text-align: center; }
 .not-found-page p { color: var(--muted); margin-bottom: 5px; }
