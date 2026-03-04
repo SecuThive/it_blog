@@ -119,7 +119,9 @@ function toSlug(input) {
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
-    .slice(0, 80)
+    .replace(/-+/g, '-')
+    // take first 5 words only to keep URLs short and clean
+    .split('-').slice(0, 5).join('-')
 }
 
 function isoDate(d) {
