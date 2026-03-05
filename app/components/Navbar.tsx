@@ -1,10 +1,7 @@
 import Link from 'next/link'
-import { getPostCategorySummaries } from '../lib/posts'
+import NavCategoryDropdown from './NavCategoryDropdown'
 
-export default async function Navbar() {
-  const categories = await getPostCategorySummaries()
-  const navItems = [{ href: '/', label: '홈' }, ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.name }))]
-
+export default function Navbar() {
   return (
     <header className="site-header">
       {/* 상단 리본 */}
@@ -34,11 +31,8 @@ export default async function Navbar() {
           </Link>
 
           <nav aria-label="메인 메뉴" className="main-nav">
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
-                {item.label}
-              </Link>
-            ))}
+            <Link href="/">홈</Link>
+            <NavCategoryDropdown />
           </nav>
 
           <Link href="/about" className="header-cta">

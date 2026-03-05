@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getCategoryLabelFromSlug } from './categories'
 
 export type PostCategory = string
 
@@ -31,12 +32,7 @@ export type PostCategorySummary = {
 }
 
 export function getCategoryLabel(slug: string): string {
-  return slug
-    .trim()
-    .split('-')
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase() + part.slice(1))
-    .join(' ')
+  return getCategoryLabelFromSlug(slug)
 }
 
 function getCategoryDescription(slug: string): string {
