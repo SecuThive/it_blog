@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { notFound } from 'next/navigation'
 import CommentSection from '../../components/CommentSection'
+import ShareButtons from '../../components/ShareButtons'
 import PostCard from '../../components/PostCard'
 import FaqAccordion from '../../components/FaqAccordion'
 import PostToc from '../../components/PostToc'
@@ -165,6 +166,9 @@ export default async function PostPage({ params }: PostPageProps) {
         {/* ── 목차 사이드바 ── */}
         <PostToc sections={post.sections} readMinutes={post.readMinutes} />
       </div>
+
+      {/* ── 공유 버튼 ── */}
+      <ShareButtons title={post.title} url={`${SITE_URL}/post/${post.slug}`} />
 
       {/* ── 이전/다음 글 ── */}
       <section className="pager" aria-label="글 이동">

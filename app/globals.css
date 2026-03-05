@@ -423,6 +423,54 @@ a { color: inherit; text-decoration: none; }
 }
 .search-bar__btn:hover { background: var(--point-hover); }
 
+/* ─── 공유 버튼 ───────────────────────────────── */
+.share-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 32px 0 24px;
+  flex-wrap: wrap;
+}
+
+.share-buttons__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.share-btn--kakao {
+  background: #FEE500;
+  color: #191F28;
+}
+.share-btn--kakao:hover { background: #F5DC00; }
+
+.share-btn--x {
+  background: #000;
+  color: #fff;
+}
+.share-btn--x:hover { background: #333; }
+
+.share-btn--copy {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  border: 1px solid var(--line);
+}
+.share-btn--copy:hover { background: var(--point-soft); color: var(--point); }
+
 .header-cta {
   border-radius: var(--radius-full);
   padding: 8px 18px;
