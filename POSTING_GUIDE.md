@@ -14,13 +14,49 @@ AI 자동화 도구에게 이 문서를 전달하면 동일한 형식으로 글�
 
 ---
 
+## 카테고리 분류 기준
+
+`category` 필드에는 아래 9개 중 **정확히 하나**의 slug를 사용하세요.
+제목/내용을 보고 가장 잘 맞는 카테고리를 선택합니다.
+
+| slug | 표시 이름 | 해당 제품/주제 |
+|------|----------|---------------|
+| `laptop` | 노트북 | MacBook, 갤럭시북, LG gram, ThinkPad 등 노트북 전반 |
+| `smartphone` | 스마트폰 | iPhone, Galaxy S/Z, Pixel 등 스마트폰 |
+| `tablet` | 태블릿 | iPad, Galaxy Tab 등 태블릿 |
+| `desktop` | 데스크탑 | iMac, Mac mini, Mac Pro, PC 등 |
+| `wearable` | 웨어러블 | Apple Watch, Galaxy Watch, 스마트밴드 등 |
+| `audio` | 오디오 | AirPods, Galaxy Buds, 헤드폰, 스피커 등 |
+| `software` | 소프트웨어 | macOS, Windows, iOS, Android OS 업데이트, 앱 등 |
+| `ai` | AI·서비스 | ChatGPT, Claude, Gemini, Copilot 등 AI 제품·서비스 |
+| `it-news` | IT 뉴스 | 위 카테고리에 해당하지 않는 IT 업계 소식, 기업 발표 등 |
+
+**카테고리 판단 예시**
+
+| 제목 예시 | category |
+|----------|----------|
+| MacBook Air M5 출시 | `laptop` |
+| M5 Pro·M5 Max 발표 (MacBook Pro 칩) | `laptop` |
+| LG gram 2026 라인업 | `laptop` |
+| iPhone 17 공식 발표 | `smartphone` |
+| Galaxy S25 Ultra 리뷰 | `smartphone` |
+| iPad Pro M5 출시 | `tablet` |
+| Apple Watch Ultra 3 발표 | `wearable` |
+| AirPods Pro 3 출시 | `audio` |
+| macOS 16 업데이트 | `software` |
+| iOS 20 새 기능 정리 | `software` |
+| ChatGPT o3 출시 | `ai` |
+| Google I/O 2026 요약 | `it-news` |
+
+---
+
 ## 포스트 메타데이터
 
 ```json
 {
   "title": "제품명/이슈 한글 요약 — 핵심 포인트와 구매 체크리스트",
   "description": "상세 요약/체크리스트: {원문 제목 또는 카테고리}",
-  "category": "apple | mobile | pc | software | news",
+  "category": "laptop",
   "tags": ["제품명", "브랜드", "카테고리", "핵심스펙", "이슈키워드"],
   "slug": "영문-소문자-하이픈-최대5단어-YYYY-MM-DD"
 }
