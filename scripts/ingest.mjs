@@ -143,6 +143,33 @@ function detectCategory(title) {
   return 'it-news'
 }
 
+function inferTags(title, category) {
+  const t = String(title || '')
+
+  // Minimal, safe tags (4~6) per guide. Prefer product/brand/category keywords.
+  const tags = new Set()
+
+  // Brand/product hints
+  if (/\blg\b|\bgram\b|그램/i.test(t)) {
+    tags.add('lg')
+    tags.add('gram')
+    tags.add('노트북')
+  }
+  if (/apple|macbook|ipad|iphone|airpods/i.test(t)) tags.add('apple')
+  if (/galaxy|samsung|갤럭시/i.test(t)) tags.add('samsung')
+  if (/m\d+/i.test(t)) tags.add(t.match(/m\d+/i)?.[0].toLowerCase())
+  if (/rtx\s*\d+/i.test(t)) tags.add(t.match(/rtx\s*\d+/i)?.[0].toLowerCase().replace(/\s+/g, ''))
+
+  // Category tag
+  tags.add(category)
+
+  // Fallbacks
+  if (tags.size < 4) tags.add('업데이트')
+  if (tags.size < 4) tags.add('신제품')
+
+  return Array.from(tags).filter(Boolean).slice(0, 6)
+}
+
 function isoDate(d) {
   try {
     return new Date(d).toISOString()
@@ -206,7 +233,7 @@ async function buildDetailedKoreanPost(item, feed) {
   const checklist = [
     '구매 체크리스트(체크하고 결론 내리기)',
     '- ☐ 한국 출시일/가격/구성이 확정됐나?',
-    '- ☐ AppleCare+/AS 조건이 내 기준에 맞나?',
+    '- ☐ AS/보증 조건이 내 기준에 맞나? (정발/직구 포함)',
     '- ☐ 내 사용패턴에서 병목이 뭔지 확실한가? (RAM/SSD/배터리/발열)',
     '- ☐ 옵션 구성(메모리/저장공간)을 과소/과대 선택하지 않았나?',
     '- ☐ 직구 vs 정발 총비용(환율/관부가세/보증)을 계산했나?',
@@ -227,7 +254,7 @@ async function buildDetailedKoreanPost(item, feed) {
   const koreaChecklist = [
     '한국 사용자 체크포인트',
     '- 정발 여부 / 출시일 / 사전예약 혜택',
-    '- AppleCare+ / AS 정책, 수리 기간, 교체 비용',
+    '- AS/보증 정책, 수리 기간, 교체 비용(가능하면 공식 안내 확인)',
     '- 충전/허브/외부 모니터 등 주변기기 호환',
     '- 직구 vs 정발: 총비용/보증 차이',
   ].join('\n')
@@ -254,38 +281,20 @@ async function buildDetailedKoreanPost(item, feed) {
     .filter(Boolean)
     .join('\n')
 
-  const baseSections = [
+  const accessory = '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.'
+
+  // IMPORTANT: Guide requires exactly 9 sections, fixed order and headings.
+  const sections = [
     { heading: '요약', content: summary },
     { heading: '핵심 포인트', content: keyPoints },
     { heading: '구매 체크리스트', content: checklist },
     { heading: '살까 말까', content: prosCons },
     { heading: '한국 사용자 체크포인트', content: koreaChecklist },
-    { heading: '관련 악세사리 추천', content: '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.' },
+    { heading: '관련 악세사리 추천', content: accessory },
     { heading: 'FAQ', content: faq },
     { heading: '결론', content: conclusion },
     { heading: '출처', content: sources },
   ]
-
-  // Ensure minimum readable length (~3000+ chars) by appending extra FAQ/checklist
-  const currentLen = baseSections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
-  const paddingSections = []
-  if (currentLen < 3200) {
-    paddingSections.push({
-      heading: '구매 전 최종 체크(10문 10답)',
-      content: [
-        '- 내 예산 상한선은? (기기 + 보증 + 액세서리)',
-        '- 지금 가장 불편한 점은? (속도/배터리/무게/발열/소음/포트)',
-        '- 그 불편함이 새 모델에서 해결되나?',
-        '- 한국 정발/AS 조건은 명확한가?',
-        '- 저장공간/메모리 옵션은 충분한가? (2~3년 기준)',
-        '- 주변기기/포트 구성은 맞나?',
-        '- 1~2개월 기다리면 조건이 좋아질 가능성은?',
-        '- 중고로 되팔 계획이 있나?',
-        '- 지금은 Need인가 Want인가?',
-        '- 결론을 한 문장으로 적어보기',
-      ].join('\n'),
-    })
-  }
 
   const category = detectCategory(rawTitle || title)
 
@@ -293,10 +302,10 @@ async function buildDetailedKoreanPost(item, feed) {
     title,
     description: `상세 요약/체크리스트: ${rawTitle || category || 'IT'}`,
     category,
-    tags: ['it', 'news', category, sourceName.replace(/\s+/g, '-')].slice(0, 6),
+    tags: inferTags(rawTitle || title, category),
     hotlinkCover,
     sourceUrl,
-    sections: [...baseSections, ...paddingSections],
+    sections,
   }
 }
 
@@ -444,7 +453,7 @@ async function main() {
         description: post.description,
         category: post.category,
         tags: post.tags,
-        author: '오늘의 IT 블로그',
+        author: 'ThiveLab 편집부',
         featured: false,
         readMinutes,
         createdAt: publishedAt,
