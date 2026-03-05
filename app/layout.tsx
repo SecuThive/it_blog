@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import AnimationInit from './components/AnimationInit'
 import DynamicUI from './components/DynamicUI'
 import CookieBanner from './components/CookieBanner'
+import GoogleAnalytics from './components/GoogleAnalytics'
 import { getPostCategorySummaries } from './lib/posts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <div className="page-bg" />
         <AnimationInit />
         <DynamicUI />
+        <GoogleAnalytics />
         <CookieBanner />
         <Navbar />
         <main className="page-main">{children}</main>
