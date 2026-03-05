@@ -2,16 +2,27 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import PostCard from './components/PostCard'
-import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getCategoryLabel } from './lib/posts'
+import Pagination from './components/Pagination'
+import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel } from './lib/posts'
 
 export const revalidate = 3600
 
-export default async function Home() {
-  const [featured, allPosts, categories] = await Promise.all([
+const PAGE_SIZE = 5
+
+type Props = { searchParams: Promise<{ page?: string }> }
+
+export default async function Home({ searchParams }: Props) {
+  const { page } = await searchParams
+  const currentPage = Math.max(1, parseInt(page ?? '1') || 1)
+
+  const [featured, pagedPosts, totalCount, allPosts, categories] = await Promise.all([
     getFeaturedPosts(),
+    getPaginatedPosts(currentPage, PAGE_SIZE),
+    getPostsCount(),
     getAllPosts(),
     getPostCategorySummaries(),
   ])
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const hotPosts = allPosts.slice(0, 5)
   const leadPost = allPosts[0]
   const leadSecondary = allPosts.slice(1, 4)
@@ -126,11 +137,12 @@ export default async function Home() {
             </div>
           </div>
           <div className="post-list">
-            {allPosts.map((post) => (
+            {pagedPosts.map((post) => (
               <PostCard key={post.id} post={post} compact />
             ))}
-            {allPosts.length === 0 && <p className="home-empty">등록된 글이 없습니다.</p>}
+            {pagedPosts.length === 0 && <p className="home-empty">등록된 글이 없습니다.</p>}
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} />
         </div>
 
         <aside className="sidebar animate-up" aria-label="사이드바">

@@ -61,6 +61,35 @@ function rowToPost(row: Record<string, unknown>, sections: Record<string, unknow
   }
 }
 
+export async function getPostsCount(): Promise<number> {
+  const { count } = await supabase
+    .from('posts')
+    .select('*', { count: 'exact', head: true })
+  return count ?? 0
+}
+
+export async function getPaginatedPosts(page: number, pageSize: number): Promise<Post[]> {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  const { data: postRows, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error || !postRows?.length) return []
+
+  const postIds = postRows.map((p) => p.id)
+  const { data: sectionRows } = await supabase
+    .from('post_sections')
+    .select('*')
+    .in('post_id', postIds)
+    .order('position', { ascending: true })
+
+  return postRows.map((row) => rowToPost(row, sectionRows ?? []))
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   const { data: postRows, error: postError } = await supabase
     .from('posts')
