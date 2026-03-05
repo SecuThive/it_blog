@@ -182,6 +182,29 @@ export async function getRelatedPosts(slug: string, category: PostCategory): Pro
   return postRows.map((row) => rowToPost(row, sectionRows ?? []))
 }
 
+export async function searchPosts(query: string): Promise<Post[]> {
+  if (!query.trim()) return []
+
+  const q = `%${query.trim()}%`
+  const { data: postRows, error } = await supabase
+    .from('posts')
+    .select('*')
+    .or(`title.ilike.${q},description.ilike.${q}`)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error || !postRows?.length) return []
+
+  const postIds = postRows.map((p) => p.id)
+  const { data: sectionRows } = await supabase
+    .from('post_sections')
+    .select('*')
+    .in('post_id', postIds)
+    .order('position', { ascending: true })
+
+  return postRows.map((row) => rowToPost(row, sectionRows ?? []))
+}
+
 export async function getPrevNextPost(
   slug: string,
 ): Promise<{ prev: Post | undefined; next: Post | undefined }> {

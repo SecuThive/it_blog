@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import NavCategoryDropdown from './NavCategoryDropdown'
+import NavSearch from './NavSearch'
 
 export default function Navbar() {
   return (
@@ -35,9 +36,12 @@ export default function Navbar() {
             <NavCategoryDropdown />
           </nav>
 
-          <Link href="/about" className="header-cta">
-            블로그 소개
-          </Link>
+          <div className="main-header__right">
+            <NavSearch />
+            <Link href="/about" className="header-cta">
+              블로그 소개
+            </Link>
+          </div>
         </div>
       </div>
     </header>
