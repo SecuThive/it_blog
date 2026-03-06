@@ -66,7 +66,8 @@ function guessRawTitle(post) {
   const desc = ensureText(post.description)
   const m = desc.match(/:\s*(.+)$/)
   if (m?.[1]) return m[1].trim()
-  return post.source_url ? post.source_url : post.title
+  // Never return a URL as rawTitle; prefer title if we can't extract.
+  return post.title
 }
 
 function buildTemplateASections(rawTitle, existing) {
@@ -324,10 +325,12 @@ async function main() {
 
     const newTitle = template === 'A' ? titleForTemplateA(rawTitle) : titleForTemplateB(rawTitle)
 
+    const safeRawTitle = String(rawTitle || '').replace(/https?:\/\/\S+/g, '').trim() || rawTitle
+
     const newDescription =
       template === 'A'
-        ? `리뷰/체크리스트: ${rawTitle}`
-        : `정보 정리/체크리스트: ${rawTitle}`
+        ? `리뷰/체크리스트: ${safeRawTitle}`
+        : `정보 정리/체크리스트: ${safeRawTitle}`
 
     const newSections =
       template === 'A' ? buildTemplateASections(rawTitle, sections) : buildTemplateBSections(rawTitle, sections)
