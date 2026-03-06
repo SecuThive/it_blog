@@ -5,8 +5,6 @@ import PostCard from './components/PostCard'
 import Pagination from './components/Pagination'
 import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel } from './lib/posts'
 
-export const revalidate = 3600
-
 const PAGE_SIZE = 5
 
 type Props = { searchParams: Promise<{ page?: string }> }

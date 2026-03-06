@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { startTransition } from 'react'
 
 type Props = {
   currentPage: number
@@ -18,12 +18,14 @@ export default function Pagination({ currentPage, totalPages, basePath = '' }: P
     return page === 1 ? `${basePath}/` : `${basePath}/?page=${page}`
   }
 
-  function go(page: number) {
-    router.push(pageUrl(page))
-    router.refresh()
+  function go(e: React.MouseEvent<HTMLAnchorElement>, page: number) {
+    e.preventDefault()
+    startTransition(() => {
+      router.push(pageUrl(page))
+      router.refresh()
+    })
   }
 
-  // 표시할 페이지 번호 범위 (최대 5개)
   const delta = 2
   const start = Math.max(1, currentPage - delta)
   const end = Math.min(totalPages, currentPage + delta)
@@ -32,43 +34,43 @@ export default function Pagination({ currentPage, totalPages, basePath = '' }: P
   return (
     <nav className="pagination" aria-label="페이지 이동">
       {currentPage > 1 ? (
-        <Link href={pageUrl(currentPage - 1)} onClick={() => router.refresh()} className="pagination__btn" aria-label="이전 페이지">
+        <a href={pageUrl(currentPage - 1)} onClick={(e) => go(e, currentPage - 1)} className="pagination__btn" aria-label="이전 페이지">
           ←
-        </Link>
+        </a>
       ) : (
         <span className="pagination__btn is-disabled">←</span>
       )}
 
       {start > 1 && (
         <>
-          <Link href={pageUrl(1)} onClick={() => router.refresh()} className="pagination__num">1</Link>
+          <a href={pageUrl(1)} onClick={(e) => go(e, 1)} className="pagination__num">1</a>
           {start > 2 && <span className="pagination__ellipsis">…</span>}
         </>
       )}
 
       {pages.map((page) => (
-        <Link
+        <a
           key={page}
           href={pageUrl(page)}
-          onClick={() => router.refresh()}
+          onClick={(e) => go(e, page)}
           className={`pagination__num${page === currentPage ? ' is-active' : ''}`}
           aria-current={page === currentPage ? 'page' : undefined}
         >
           {page}
-        </Link>
+        </a>
       ))}
 
       {end < totalPages && (
         <>
           {end < totalPages - 1 && <span className="pagination__ellipsis">…</span>}
-          <Link href={pageUrl(totalPages)} onClick={() => router.refresh()} className="pagination__num">{totalPages}</Link>
+          <a href={pageUrl(totalPages)} onClick={(e) => go(e, totalPages)} className="pagination__num">{totalPages}</a>
         </>
       )}
 
       {currentPage < totalPages ? (
-        <Link href={pageUrl(currentPage + 1)} onClick={() => router.refresh()} className="pagination__btn" aria-label="다음 페이지">
+        <a href={pageUrl(currentPage + 1)} onClick={(e) => go(e, currentPage + 1)} className="pagination__btn" aria-label="다음 페이지">
           →
-        </Link>
+        </a>
       ) : (
         <span className="pagination__btn is-disabled">→</span>
       )}
