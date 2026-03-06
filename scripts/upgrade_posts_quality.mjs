@@ -265,10 +265,22 @@ function inferDescription(template, rawTitle) {
 }
 
 async function main() {
-  const { data: posts, error } = await sb
+  const postIdsEnv = String(process.env.POST_IDS || '').trim()
+  const onlyIds = postIdsEnv
+    ? postIdsEnv
+        .split(',')
+        .map((x) => Number.parseInt(x.trim(), 10))
+        .filter((n) => Number.isFinite(n))
+    : null
+
+  let q = sb
     .from('posts')
     .select('id,slug,title,description,category,source_url,created_at')
     .order('id', { ascending: true })
+
+  if (onlyIds?.length) q = q.in('id', onlyIds)
+
+  const { data: posts, error } = await q
 
   if (error) throw error
 

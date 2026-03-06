@@ -548,6 +548,7 @@ async function main() {
   await ensureIngestTables()
 
   let createdCount = 0
+  const createdPostIds = []
   const maxPosts = Number.parseInt(process.env.MAX_POSTS || '2', 10) || 2
 
   for (const feed of feeds) {
@@ -581,7 +582,7 @@ async function main() {
       const approxChars = post.sections.map((s) => `${s.heading}\n${s.content}`).join('\n\n').length
       const readMinutes = Math.max(3, Math.ceil(Math.min(approxChars, 3000) / 300) + 1)
 
-      await upsertPostAndSections({
+      const postId = await upsertPostAndSections({
         slug,
         title: post.title,
         description: post.description,
@@ -595,6 +596,7 @@ async function main() {
         sourceUrl: post.sourceUrl,
         sections: post.sections,
       })
+      createdPostIds.push(postId)
 
       await markIngested({ sourceId, url, title: item.title || 'Untitled', publishedAt })
 
@@ -605,7 +607,7 @@ async function main() {
     if (createdCount >= maxPosts) break
   }
 
-  console.log(JSON.stringify({ ok: true, createdCount }, null, 2))
+  console.log(JSON.stringify({ ok: true, createdCount, createdPostIds }, null, 2))
 }
 
 main().catch((e) => {
