@@ -120,7 +120,15 @@ function desiredTemplate({ category, title, description }) {
 
 function buildTitle({ category, title, description, sourceUrl }) {
   const template = desiredTemplate({ category, title, description })
-  const head = toSeoHead({ title, description, category, sourceUrl })
+  let head = toSeoHead({ title, description, category, sourceUrl })
+
+  // Avoid duplicated prefixes like "IT: IT:" etc.
+  head = head.replace(/^(IT|AI|노트북|스마트폰|태블릿|데스크탑|웨어러블|오디오|소프트웨어)\s*:\s*/g, (m) => m) // normalize spacing
+  head = head.replace(/^(IT|AI|노트북|스마트폰|태블릿|데스크탑|웨어러블|오디오|소프트웨어)\s*:\s*(\1\s*:\s*)+/g, '$1: ')
+
+  // Remove accidental duplicate template suffixes if present
+  head = stripTemplateSuffixes(head)
+
   return template === 'A' ? `${head} ${SUFFIX_A}` : `${head} ${SUFFIX_B}`
 }
 
