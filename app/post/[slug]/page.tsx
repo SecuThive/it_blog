@@ -148,7 +148,7 @@ export default async function PostPage({ params }: PostPageProps) {
                   {cleanHeading(section.heading)}
                 </h2>
                 <div className="post-md">
-                  {section.heading.includes('악세사리') || section.heading.includes('대체재') || section.heading.includes('비교 프레임') ? (
+                  {section.heading.includes('악세사리') || section.heading.includes('도구 추천') || section.heading.includes('대체재') || section.heading.includes('비교 프레임') ? (
                     <CoupangProducts keyword={deriveAccessoryKeyword(post.title, post.tags)} />
                   ) : section.heading.trim().toLowerCase() === 'faq' || section.heading.includes('FAQ') ? (
                     <FaqAccordion text={section.content} />
