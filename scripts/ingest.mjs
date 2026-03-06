@@ -293,12 +293,16 @@ function buildSectionsTemplateA({ rawTitle, category, sourceName, sourceUrl, pub
 
   const accessory = '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.'
 
-  // IMPORTANT: FAQ is rendered as accordion. Keep one Q per line in `질문 → 답변` format.
+  // IMPORTANT: FAQ is rendered as accordion.
+  // Format should be: `질문?` on its own line, followed by one or more answer lines like `- 답변...`.
   const faq = [
     'FAQ(짧게)',
-    '- 지금 사도 되나요? → 급하면 구매, 여유가 있으면 한국 조건/실사용 리뷰 확인 후가 안전합니다.',
-    '- 업그레이드 가치가 있나요? → 스펙보다 내 병목(배터리/무게/발열/소음/화면)이 해결되는지가 핵심입니다.',
-    '- 옵션은 어떻게 고르나요? → RAM 부족 스트레스면 메모리, 항상 꽉 차면 저장공간 우선으로 잡으세요.',
+    '지금 사도 되나요?',
+    '- 급하면 구매, 여유가 있으면 한국 조건/실사용 리뷰 확인 후가 안전합니다.',
+    '업그레이드 가치가 있나요?',
+    '- 스펙보다 내 병목(배터리/무게/발열/소음/화면)이 해결되는지가 핵심입니다.',
+    '옵션은 어떻게 고르나요?',
+    '- RAM 부족 스트레스면 메모리, 항상 꽉 차면 저장공간 우선으로 잡으세요.',
   ].join('\n')
 
   const conclusion = [
