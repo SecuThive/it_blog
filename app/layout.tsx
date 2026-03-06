@@ -47,6 +47,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2091277631590195"
+          crossOrigin="anonymous"
+        />
       </head>
       <body>
         <div className="page-bg" />
