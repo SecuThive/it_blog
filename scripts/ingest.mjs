@@ -548,6 +548,7 @@ async function main() {
   await ensureIngestTables()
 
   let createdCount = 0
+  const maxPosts = Number.parseInt(process.env.MAX_POSTS || '2', 10) || 2
 
   for (const feed of feeds) {
     const sourceId = await upsertSource(feed)
@@ -598,10 +599,10 @@ async function main() {
       await markIngested({ sourceId, url, title: item.title || 'Untitled', publishedAt })
 
       createdCount += 1
-      if (createdCount >= 2) break
+      if (createdCount >= maxPosts) break
     }
 
-    if (createdCount >= 2) break
+    if (createdCount >= maxPosts) break
   }
 
   console.log(JSON.stringify({ ok: true, createdCount }, null, 2))
