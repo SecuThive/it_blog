@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import './globals.css'
 import Navbar from './components/Navbar'
 import AnimationInit from './components/AnimationInit'
@@ -49,7 +50,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       </head>
       <body>
         <div className="page-bg" />
-        <AnimationInit />
+        <Suspense fallback={null}><AnimationInit /></Suspense>
         <DynamicUI />
         <GoogleAnalytics />
         <CookieBanner />
