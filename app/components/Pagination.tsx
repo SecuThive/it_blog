@@ -21,14 +21,14 @@ export default function Pagination({ currentPage, totalPages, basePath = '' }: P
   return (
     <nav className="pagination" aria-label="페이지 이동">
       {currentPage > 1 ? (
-        <Link href={pageUrl(currentPage - 1)} className="pagination__btn" aria-label="이전 페이지">←</Link>
+        <Link href={pageUrl(currentPage - 1)} scroll={false} className="pagination__btn" aria-label="이전 페이지">←</Link>
       ) : (
         <span className="pagination__btn is-disabled">←</span>
       )}
 
       {start > 1 && (
         <>
-          <Link href={pageUrl(1)} className="pagination__num">1</Link>
+          <Link href={pageUrl(1)} scroll={false} className="pagination__num">1</Link>
           {start > 2 && <span className="pagination__ellipsis">…</span>}
         </>
       )}
@@ -37,6 +37,7 @@ export default function Pagination({ currentPage, totalPages, basePath = '' }: P
         <Link
           key={page}
           href={pageUrl(page)}
+          scroll={false}
           className={`pagination__num${page === currentPage ? ' is-active' : ''}`}
           aria-current={page === currentPage ? 'page' : undefined}
         >
@@ -47,12 +48,12 @@ export default function Pagination({ currentPage, totalPages, basePath = '' }: P
       {end < totalPages && (
         <>
           {end < totalPages - 1 && <span className="pagination__ellipsis">…</span>}
-          <Link href={pageUrl(totalPages)} className="pagination__num">{totalPages}</Link>
+          <Link href={pageUrl(totalPages)} scroll={false} className="pagination__num">{totalPages}</Link>
         </>
       )}
 
       {currentPage < totalPages ? (
-        <Link href={pageUrl(currentPage + 1)} className="pagination__btn" aria-label="다음 페이지">→</Link>
+        <Link href={pageUrl(currentPage + 1)} scroll={false} className="pagination__btn" aria-label="다음 페이지">→</Link>
       ) : (
         <span className="pagination__btn is-disabled">→</span>
       )}
