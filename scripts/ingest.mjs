@@ -293,6 +293,7 @@ function buildSectionsTemplateA({ rawTitle, category, sourceName, sourceUrl, pub
 
   const accessory = '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.'
 
+  // IMPORTANT: FAQ is rendered as accordion. Keep one Q per line in `질문 → 답변` format.
   const faq = [
     'FAQ(짧게)',
     '- 지금 사도 되나요? → 급하면 구매, 여유가 있으면 한국 조건/실사용 리뷰 확인 후가 안전합니다.',
