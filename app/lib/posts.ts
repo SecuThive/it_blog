@@ -259,7 +259,7 @@ export async function getRelatedPosts(slug: string, category: PostCategory): Pro
     .eq('category', category)
     .neq('slug', slug)
     .order('created_at', { ascending: false })
-    .limit(3)
+    .limit(9)
 
   if (error || !postRows?.length) return []
 

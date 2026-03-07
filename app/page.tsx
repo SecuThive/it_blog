@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import PostCard from './components/PostCard'
 import Pagination from './components/Pagination'
-import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel } from './lib/posts'
+import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel, getAllTags } from './lib/posts'
 
 const PAGE_SIZE = 5
 
@@ -13,12 +13,13 @@ export default async function Home({ searchParams }: Props) {
   const { page } = await searchParams
   const currentPage = Math.max(1, parseInt(page ?? '1') || 1)
 
-  const [featured, pagedPosts, totalCount, allPosts, categories] = await Promise.all([
+  const [featured, pagedPosts, totalCount, allPosts, categories, tags] = await Promise.all([
     getFeaturedPosts(),
     getPaginatedPosts(currentPage, PAGE_SIZE),
     getPostsCount(),
     getAllPosts(),
     getPostCategorySummaries(),
+    getAllTags(),
   ])
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const hotPosts = allPosts.slice(0, 5)
@@ -167,6 +168,18 @@ export default async function Home({ searchParams }: Props) {
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className="sidebar-card">
+            <h3>태그</h3>
+            <div className="tag-cloud">
+              {tags.slice(0, 30).map((tag) => (
+                <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="tag-pill">
+                  #{tag}
+                </Link>
+              ))}
+              {tags.length === 0 ? <p className="home-empty">태그가 없습니다.</p> : null}
+            </div>
           </section>
 
           <section className="sidebar-card sidebar-card--notice">

@@ -1192,10 +1192,37 @@ a { color: inherit; text-decoration: none; }
   cursor: default;
 }
 
+.tag-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .tag-list li:hover {
   background: var(--point-soft);
   color: var(--point);
   border-color: var(--point-muted);
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(235, 240, 255, 0.92);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.tag-pill:hover {
+  background: rgba(255, 255, 255, 0.10);
 }
 
 /* ─── 포스트 본문 ─────────────────────────────── */

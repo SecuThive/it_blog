@@ -19,15 +19,23 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   const title = `#${summary.tag} | ThiveLab`
   const description = `#${summary.tag} 관련 글 ${summary.count}개 모음 — 최신 IT 소식/업데이트를 모아봅니다.`
 
+  const canonical = `${SITE_URL}/tag/${encodeURIComponent(summary.tag)}`
+
   return {
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/tag/${encodeURIComponent(summary.tag)}` },
+    alternates: { canonical },
     openGraph: {
       type: 'website',
       title,
       description,
-      url: `${SITE_URL}/tag/${encodeURIComponent(summary.tag)}`,
+      url: canonical,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${SITE_URL}/og-default.svg`],
     },
   }
 }
@@ -38,8 +46,28 @@ export default async function TagPage({ params }: TagPageProps) {
   const [summary, posts] = await Promise.all([getTagSummary(tag), getPostsByTag(tag)])
   if (!summary || posts.length === 0) notFound()
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `#${summary.tag} | ThiveLab`,
+    url: `${SITE_URL}/tag/${encodeURIComponent(summary.tag)}`,
+    inLanguage: 'ko-KR',
+    isPartOf: { '@type': 'WebSite', name: 'ThiveLab', url: SITE_URL },
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: `#${summary.tag}`, item: `${SITE_URL}/tag/${encodeURIComponent(summary.tag)}` },
+    ],
+  }
+
   return (
     <div className="container category-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <header className="category-header">
         <p>태그</p>
         <h1>#{summary.tag}</h1>
