@@ -95,24 +95,42 @@ export default async function PostPage({ params }: PostPageProps) {
     getPrevNextPost(post.slug),
   ])
 
-  const jsonLd = {
+  const ogImage = post.coverImageUrl || `${SITE_URL}/og-default.svg`
+
+  const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/post/${post.slug}`,
+    },
     headline: post.title,
     description: post.description,
     datePublished: post.createdAt,
+    dateModified: post.createdAt,
+    inLanguage: 'ko-KR',
+    articleSection: getCategoryLabel(post.category),
+    keywords: post.tags,
     author: { '@type': 'Organization', name: 'ThiveLab' },
-    publisher: { '@type': 'Organization', name: 'ThiveLab', url: SITE_URL },
+    publisher: { '@type': 'Organization', name: 'ThiveLab', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/og-default.svg` } },
+    image: [ogImage],
     url: `${SITE_URL}/post/${post.slug}`,
-    ...(post.coverImageUrl ? { image: post.coverImageUrl } : {}),
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: getCategoryLabel(post.category), item: `${SITE_URL}/category/${post.category}` },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE_URL}/post/${post.slug}` },
+    ],
   }
 
   return (
     <div className="container post-page">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* 본문 + 목차 2단 레이아웃 */}
       <div className="post-layout">
         {/* ── 본문 ── */}

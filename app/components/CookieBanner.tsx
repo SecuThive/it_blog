@@ -6,12 +6,17 @@ import { useEffect, useState } from 'react'
 export default function CookieBanner() {
   const [show, setShow] = useState(false)
 
-  useEffect(() => {
+  // Initialize from localStorage once; avoids setState inside effect (eslint rule).
+  const [show, setShow] = useState(() => {
     try {
-      if (!localStorage.getItem('cookie-consent')) setShow(true)
+      return !localStorage.getItem('cookie-consent')
     } catch {
-      // 개인정보 모드 등 localStorage 접근 불가 시 무시
+      return false
     }
+  })
+
+  useEffect(() => {
+    // no-op: kept for future cookie sync if needed
   }, [])
 
   function accept() {

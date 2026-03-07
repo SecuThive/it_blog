@@ -47,6 +47,27 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const categories = await getPostCategorySummaries()
 
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: 'ko-KR',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-default.svg`,
+  }
+
   return (
     <html lang="ko">
       <head>
@@ -63,6 +84,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         />
       </head>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         <div className="page-bg" />
         <Suspense fallback={null}><AnimationInit /></Suspense>
         <DynamicUI />
