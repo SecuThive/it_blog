@@ -8,9 +8,9 @@ export default function ShareButtons({ title, url }: Props) {
   const [copied, setCopied] = useState(false)
 
   function shareKakao() {
-    const kakaoUrl = `https://sharer.kakao.com/talk/friends/picker/link?app_key=&template_id=&link_ver=4.0&template_args[title]=${encodeURIComponent(title)}&template_args[url]=${encodeURIComponent(url)}`
-    const searchUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`
-    window.open(searchUrl, '_blank', 'width=500,height=600')
+    // Using KakaoStory share (KakaoTalk sharing requires app key/template).
+    const storyUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`
+    window.open(storyUrl, '_blank', 'width=500,height=600')
   }
 
   function shareX() {

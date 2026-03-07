@@ -34,6 +34,7 @@ export type PostCategorySummary = {
 export type TagSummary = {
   tag: string
   count: number
+  description: string
 }
 
 export function getCategoryLabel(slug: string): string {
@@ -133,6 +134,20 @@ export async function getAllTags(): Promise<string[]> {
   return [...tags].sort((a, b) => a.localeCompare(b))
 }
 
+function describeTag(tag: string): string {
+  const t = String(tag || '').trim()
+  const lower = t.toLowerCase()
+
+  if (lower === 'openai' || lower === 'chatgpt') return 'OpenAI/ChatGPT 업데이트와 활용 팁을 모아봅니다.'
+  if (lower.startsWith('gpt-')) return 'GPT 모델 업데이트·비교·체크리스트 글을 모아봅니다.'
+  if (lower === 'apple' || lower.includes('mac') || lower.includes('iphone') || lower.includes('ipad')) return 'Apple 관련 발표/업데이트를 모아봅니다.'
+  if (lower === 'samsung' || lower.includes('galaxy')) return '삼성/갤럭시 관련 신제품·업데이트를 모아봅니다.'
+  if (lower === 'lg' || lower.includes('gram')) return 'LG/LG gram 관련 신제품·업데이트를 모아봅니다.'
+  if (lower === 'ai') return 'AI 서비스/모델/업계 소식을 모아봅니다.'
+
+  return `#${t} 관련 글을 모아봅니다.`
+}
+
 export async function getTagSummary(tag: string): Promise<TagSummary | null> {
   const t = String(tag || '').trim()
   if (!t) return null
@@ -144,7 +159,7 @@ export async function getTagSummary(tag: string): Promise<TagSummary | null> {
     .contains('tags', [t])
 
   if (error) return null
-  return { tag: t, count: count ?? 0 }
+  return { tag: t, count: count ?? 0, description: describeTag(t) }
 }
 
 export async function getPostsByTag(tag: string): Promise<Post[]> {
@@ -271,6 +286,81 @@ export async function getRelatedPosts(slug: string, category: PostCategory): Pro
     .order('position', { ascending: true })
 
   return postRows.map((row) => rowToPost(row, sectionRows ?? []))
+}
+
+export async function getRelatedPostsSmart(slug: string, category: PostCategory, tags: string[]): Promise<Post[]> {
+  const cleanTags = Array.isArray(tags) ? tags.filter(Boolean).slice(0, 10) : []
+
+  // 1) Same category candidates
+  const { data: catRows } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('category', category)
+    .neq('slug', slug)
+    .order('created_at', { ascending: false })
+    .limit(30)
+
+  // 2) Tag overlap candidates (any overlap)
+  const { data: tagRows } = cleanTags.length
+    ? await supabase
+        .from('posts')
+        .select('*')
+        .neq('slug', slug)
+        .overlaps('tags', cleanTags)
+        .order('created_at', { ascending: false })
+        .limit(30)
+    : { data: [] }
+
+  const merged = new Map<number, Record<string, unknown>>()
+  for (const r of [...(catRows ?? []), ...(tagRows ?? [])]) {
+    const rr = r as Record<string, unknown>
+    merged.set(Number(rr.id), rr)
+  }
+
+  const rows = [...merged.values()]
+
+  // Rank: tag overlap count + same category bonus + recency
+  const tagSet = new Set(cleanTags.map((t) => String(t).toLowerCase()))
+  rows.sort((a, b) => {
+    const aTagsArr = Array.isArray((a as Record<string, unknown>).tags) ? ((a as Record<string, unknown>).tags as unknown[]) : []
+    const bTagsArr = Array.isArray((b as Record<string, unknown>).tags) ? ((b as Record<string, unknown>).tags as unknown[]) : []
+
+    const aTags = new Set(aTagsArr.map((t) => String(t).toLowerCase()))
+    const bTags = new Set(bTagsArr.map((t) => String(t).toLowerCase()))
+
+    const overlapA = [...aTags].filter((t) => tagSet.has(t)).length
+    const overlapB = [...bTags].filter((t) => tagSet.has(t)).length
+
+    const catA = String((a as Record<string, unknown>).category || '')
+    const catB = String((b as Record<string, unknown>).category || '')
+
+    const catBonusA = catA === category ? 2 : 0
+    const catBonusB = catB === category ? 2 : 0
+
+    const scoreA = overlapA * 3 + catBonusA
+    const scoreB = overlapB * 3 + catBonusB
+
+    if (scoreA !== scoreB) return scoreB - scoreA
+
+    const aTime = new Date(String((a as Record<string, unknown>).created_at || 0)).getTime()
+    const bTime = new Date(String((b as Record<string, unknown>).created_at || 0)).getTime()
+    return bTime - aTime
+  })
+
+  const top = rows.slice(0, 9)
+
+  const postIds = top.map((p) => p.id)
+  if (!postIds.length) return []
+
+  const { data: sectionRows } = await supabase
+    .from('post_sections')
+    .select('*')
+    .in('post_id', postIds)
+    .order('position', { ascending: true })
+
+  // Preserve ranking order
+  const posts = top.map((r) => rowToPost(r as Record<string, unknown>, sectionRows ?? []))
+  return posts
 }
 
 export async function searchPosts(query: string): Promise<Post[]> {

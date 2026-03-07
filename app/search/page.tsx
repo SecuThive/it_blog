@@ -5,10 +5,16 @@ import SearchBar from '../components/SearchBar'
 
 type Props = { searchParams: Promise<{ q?: string }> }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
+
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q } = await searchParams
+  const query = q?.trim() ?? ''
+
   return {
-    title: q ? `"${q}" 검색 결과` : '검색',
+    title: query ? `"${query}" 검색 결과 | ThiveLab` : '검색 | ThiveLab',
+    description: query ? `"${query}"에 대한 검색 결과입니다.` : 'ThiveLab 글을 검색합니다.',
+    alternates: { canonical: `${SITE_URL}/search${query ? `?q=${encodeURIComponent(query)}` : ''}` },
     robots: { index: false },
   }
 }

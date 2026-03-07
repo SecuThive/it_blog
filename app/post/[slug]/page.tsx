@@ -9,7 +9,7 @@ import PostCard from '../../components/PostCard'
 import FaqAccordion from '../../components/FaqAccordion'
 import PostToc from '../../components/PostToc'
 import CoupangProducts from '../../components/CoupangProducts'
-import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPosts } from '../../lib/posts'
+import { getCategoryLabel, getPostBySlug, getPrevNextPost, getRelatedPostsSmart } from '../../lib/posts'
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -91,7 +91,7 @@ export default async function PostPage({ params }: PostPageProps) {
   if (!post) notFound()
 
   const [relatedPosts, { prev, next }] = await Promise.all([
-    getRelatedPosts(post.slug, post.category),
+    getRelatedPostsSmart(post.slug, post.category, post.tags),
     getPrevNextPost(post.slug),
   ])
 

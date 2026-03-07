@@ -71,7 +71,7 @@ export default async function TagPage({ params }: TagPageProps) {
       <header className="category-header">
         <p>태그</p>
         <h1>#{summary.tag}</h1>
-        <p>관련 글 {summary.count}개</p>
+        <p>{summary.description}</p>
       </header>
 
       <div className="category-list">
