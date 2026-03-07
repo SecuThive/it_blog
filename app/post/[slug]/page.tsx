@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const { slug } = await params
   const post = await getPostBySlug(slug)
   if (!post) return { title: '게시글 없음', robots: { index: false } }
+  const ogImage = post.coverImageUrl || `${SITE_URL}/og-default.svg`
   return {
     title: post.title,
     description: post.description,
@@ -73,7 +74,13 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       url: `${SITE_URL}/post/${post.slug}`,
       publishedTime: post.createdAt,
       tags: post.tags,
-      ...(post.coverImageUrl ? { images: [{ url: post.coverImageUrl, alt: post.title }] } : {}),
+      images: [{ url: ogImage, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.description,
+      images: [ogImage],
     },
   }
 }

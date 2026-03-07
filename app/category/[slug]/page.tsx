@@ -19,6 +19,13 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: `${summary.name} | ThiveLab`,
     description: summary.description,
+    alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'}/category/${summary.slug}` },
+    openGraph: {
+      type: 'website',
+      title: `${summary.name} | ThiveLab`,
+      description: summary.description,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'}/category/${summary.slug}`,
+    },
   }
 }
 

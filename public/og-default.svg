@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="100%" stop-color="#121a33"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="50%" y="46%" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Arial" font-size="108" font-weight="700" fill="#EEF2FF" filter="url(#glow)">
+    ThiveLab
+  </text>
+  <text x="50%" y="58%" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Arial" font-size="44" font-weight="500" fill="#B8C0D9">
+    AI-curated IT insights for KR readers
+  </text>
+
+  <text x="50%" y="92%" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Arial" font-size="28" fill="#7F8AB3">
+    thivelab.com
+  </text>
+</svg>

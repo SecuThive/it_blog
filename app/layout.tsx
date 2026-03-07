@@ -18,17 +18,26 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: 'AI가 큐레이션하는 IT 인사이트 — 스마트폰, 노트북, 태블릿, 액세서리 리뷰와 구매가이드',
+  description: 'AI가 큐레이션하는 IT 인사이트 — 한국 소비자 관점의 기기 소식/업데이트 정리',
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
     locale: 'ko_KR',
+    url: SITE_URL,
+    images: [{ url: `${SITE_URL}/og-default.svg`, width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: 'AI가 큐레이션하는 IT 인사이트 — 한국 소비자 관점의 기기 소식/업데이트 정리',
+    images: [`${SITE_URL}/og-default.svg`],
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
+    canonical: SITE_URL,
     types: {
       'application/rss+xml': `${SITE_URL}/feed.xml`,
     },
