@@ -159,7 +159,9 @@ export default async function PostPage({ params }: PostPageProps) {
             {post.tags.length > 0 && (
               <ul className="tag-list">
                 {post.tags.map((tag) => (
-                  <li key={tag}>#{tag}</li>
+                  <li key={tag}>
+                    <Link href={`/tag/${encodeURIComponent(tag)}`}>#{tag}</Link>
+                  </li>
                 ))}
               </ul>
             )}

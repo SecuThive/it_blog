@@ -31,6 +31,11 @@ export type PostCategorySummary = {
   count: number
 }
 
+export type TagSummary = {
+  tag: string
+  count: number
+}
+
 export function getCategoryLabel(slug: string): string {
   return getCategoryLabelFromSlug(slug)
 }
@@ -97,6 +102,63 @@ export async function getAllPosts(): Promise<Post[]> {
     .order('created_at', { ascending: false })
 
   if (postError || !postRows?.length) return []
+
+  const postIds = postRows.map((p) => p.id)
+  const { data: sectionRows } = await supabase
+    .from('post_sections')
+    .select('*')
+    .in('post_id', postIds)
+    .order('position', { ascending: true })
+
+  return postRows.map((row) => rowToPost(row, sectionRows ?? []))
+}
+
+export async function getAllTags(): Promise<string[]> {
+  const { data, error } = await supabase.from('posts').select('tags')
+  if (error || !data?.length) return []
+
+  const tags = new Set<string>()
+  type TagsRow = { tags?: unknown }
+
+  for (const row of data as TagsRow[]) {
+    const maybe = row?.tags
+    const arr = Array.isArray(maybe) ? (maybe as unknown[]).map(String) : []
+    for (const t of arr) {
+      const tt = String(t || '').trim()
+      if (!tt) continue
+      tags.add(tt)
+    }
+  }
+
+  return [...tags].sort((a, b) => a.localeCompare(b))
+}
+
+export async function getTagSummary(tag: string): Promise<TagSummary | null> {
+  const t = String(tag || '').trim()
+  if (!t) return null
+
+  // exact match against array element
+  const { count, error } = await supabase
+    .from('posts')
+    .select('*', { count: 'exact', head: true })
+    .contains('tags', [t])
+
+  if (error) return null
+  return { tag: t, count: count ?? 0 }
+}
+
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  const t = String(tag || '').trim()
+  if (!t) return []
+
+  const { data: postRows, error } = await supabase
+    .from('posts')
+    .select('*')
+    .contains('tags', [t])
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error || !postRows?.length) return []
 
   const postIds = postRows.map((p) => p.id)
   const { data: sectionRows } = await supabase

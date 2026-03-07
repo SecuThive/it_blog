@@ -1,12 +1,13 @@
 import type { MetadataRoute } from 'next'
-import { getAllPosts, getPostCategorySummaries } from './lib/posts'
+import { getAllPosts, getPostCategorySummaries, getAllTags } from './lib/posts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, categories] = await Promise.all([
+  const [posts, categories, tags] = await Promise.all([
     getAllPosts(),
     getPostCategorySummaries(),
+    getAllTags(),
   ])
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -25,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  const tagPages: MetadataRoute.Sitemap = tags.map((tag) => ({
+    url: `${SITE_URL}/tag/${encodeURIComponent(tag)}`,
+    changeFrequency: 'daily',
+    priority: 0.4,
+  }))
+
   const postPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${SITE_URL}/post/${post.slug}`,
     lastModified: new Date(post.createdAt),
@@ -32,5 +39,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticPages, ...categoryPages, ...postPages]
+  return [...staticPages, ...categoryPages, ...tagPages, ...postPages]
 }
