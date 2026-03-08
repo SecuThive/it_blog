@@ -60,7 +60,7 @@ function stripPressPrefix(raw) {
   return s
 }
 
-function toSeoHead({ title, description, category, sourceUrl }) {
+function toSeoHead({ title, description, category }) {
   // Prefer Korean-ish head derived from title/description.
   let base = stripTemplateSuffixes(removeUrlLike(title))
 
@@ -118,9 +118,15 @@ function desiredTemplate({ category, title, description }) {
   return 'B'
 }
 
-function buildTitle({ category, title, description, sourceUrl }) {
+function isEvergreenGuideText(text) {
+  const t = ensureText(text)
+  // Search-first evergreen guides should NOT be forced into A/B "news" suffixes.
+  return /(가성비|가이드|고르는\s*법|계산법|구매\s*팁|구매\s*가이드|체크리스트\s*가이드)/.test(t)
+}
+
+function buildTitle({ category, title, description }) {
   const template = desiredTemplate({ category, title, description })
-  let head = toSeoHead({ title, description, category, sourceUrl })
+  let head = toSeoHead({ title, description, category })
 
   // Avoid duplicated prefixes like "IT: IT:" etc.
   head = head.replace(/^(IT|AI|노트북|스마트폰|태블릿|데스크탑|웨어러블|오디오|소프트웨어)\s*:\s*/g, (m) => m) // normalize spacing
@@ -128,6 +134,11 @@ function buildTitle({ category, title, description, sourceUrl }) {
 
   // Remove accidental duplicate template suffixes if present
   head = stripTemplateSuffixes(head)
+
+  // Evergreen guides: keep clean SEO title without template suffix.
+  if (isEvergreenGuideText(title) || isEvergreenGuideText(description) || isEvergreenGuideText(head)) {
+    return head
+  }
 
   return template === 'A' ? `${head} ${SUFFIX_A}` : `${head} ${SUFFIX_B}`
 }
@@ -157,7 +168,6 @@ async function main() {
       category: p.category,
       title: p.title,
       description: p.description,
-      sourceUrl: p.source_url,
     })
 
     // If title contains URL or obvious mangling, prioritize update.

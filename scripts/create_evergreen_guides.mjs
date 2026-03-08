@@ -26,18 +26,6 @@ const sb = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
-function toSlug(input) {
-  return String(input)
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .split('-')
-    .slice(0, 5)
-    .join('-')
-}
-
 function isoDate(d) {
   try {
     return new Date(d).toISOString()
