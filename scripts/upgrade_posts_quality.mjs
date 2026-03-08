@@ -96,6 +96,7 @@ function buildSectionsA({ rawTitle, extracted, sourceName, sourceUrl, publishedI
     `발표/업데이트: ${rawTitle}`,
     '',
     `한 줄 요약: ${kSummaryLine(rawTitle, extracted)}`,
+    '※ 기준: 최근 18개월 내 출시/리프레시를 우선으로 보되, 특가/가격 메리트가 크면 1세대 전도 “가성비 선택지”로 함께 봅니다.',
     '',
     '추천 대상(빠르게 보기)',
     '- 이전 세대 불편이 명확한 사람(배터리/무게/성능/발열)',
@@ -143,10 +144,11 @@ function buildSectionsA({ rawTitle, extracted, sourceName, sourceUrl, publishedI
 
   const korea = [
     '한국 사용자 체크포인트',
-    '- 정발 여부 / 출시일 / 사전예약 혜택',
-    '- AS/보증 정책, 수리 기간, 교체 비용',
+    '- 정발 여부 / 출시일 / 사전예약 혜택(학생/카드/쿠폰 포함)',
+    '- 국내 최저가 체크 포인트: 쿠팡(반품/로켓), 11번가·네이버(쿠폰/카드), 공홈(학생할인/리퍼), 직구(총비용)',
+    '- AS/보증 정책(정발/직구), 수리 기간, 교체 비용',
     '- 충전/허브/외부 모니터 등 주변기기 호환',
-    '- 직구 vs 정발: 총비용/보증 차이',
+    '- 직구 vs 정발: 환율·관부가세·배송·반품 난이도까지 포함한 총비용/보증 차이',
   ].join('\n')
 
   const accessory = '이 제품과 함께 많이 구매하는 악세사리를 확인해 보세요.'
