@@ -260,8 +260,18 @@ async function publishCarousel({ igId, token, imageUrls, caption }) {
     caption: truncateCaption(caption, 2200),
   })
 
+  // Wait until container is ready (prevents "Media ID is not available")
+  const creationId = carousel.id
+  for (let i = 0; i < 12; i++) {
+    const st = await graphGet(`/${creationId}`, token, { fields: 'status_code' })
+    const code = String(st?.status_code || '')
+    if (code === 'FINISHED') break
+    if (code === 'ERROR') throw new Error('IG container status ERROR')
+    await new Promise((r) => setTimeout(r, 1500))
+  }
+
   // 3) publish
-  const published = await graphPost(`/${igId}/media_publish`, token, { creation_id: carousel.id })
+  const published = await graphPost(`/${igId}/media_publish`, token, { creation_id: creationId })
   const mediaId = published.id
 
   // Post-flight: verify publish succeeded.
