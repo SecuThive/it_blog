@@ -2553,17 +2553,26 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 760px) {
-  .top-ribbon .site-header__inner {
-    min-height: 38px;
-    padding: 5px 0;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
+  /* 탑 리본 숨김: 모바일에서 헤더 높이 최소화 */
+  .top-ribbon { display: none; }
+
+  /* 헤더 1줄 레이아웃: 브랜드 | nav(중앙) | 검색 */
+  .main-header__inner {
+    grid-template-columns: auto 1fr auto;
+    justify-items: initial;
+    min-height: 52px;
+    padding: 0;
+    gap: 8px;
+  }
+
+  .main-nav {
+    justify-content: flex-end;
+    gap: 0;
   }
 
   .main-nav a {
-    font-size: 0.82rem;
-    padding: 6px 10px;
+    font-size: 0.8rem;
+    padding: 5px 8px;
   }
 
   .header-cta { display: none; }
