@@ -90,17 +90,23 @@ function wrapLines(text, maxChars = 16) {
 function svgSlide({ page, title, subtitle, bullets }) {
   const tLines = wrapLines(title, 14)
   const titleSvg = tLines
-    .map((l, i) => `<text x="120" y="${360 + i * 92}" font-size="78" font-weight="900" fill="rgba(255,255,255,0.92)">${escapeXml(l)}</text>`)
+    .map(
+      (l, i) =>
+        `<text x="120" y="${360 + i * 92}" font-size="78" font-weight="900" fill="rgba(255,255,255,0.92)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">${escapeXml(l)}</text>`,
+    )
     .join('')
 
   const subtitleSvg = subtitle
-    ? `<text x="120" y="${360 + tLines.length * 92 + 42}" font-size="34" font-weight="700" fill="rgba(234,240,255,0.70)">${escapeXml(subtitle)}</text>`
+    ? `<text x="120" y="${360 + tLines.length * 92 + 42}" font-size="34" font-weight="700" fill="rgba(234,240,255,0.70)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">${escapeXml(subtitle)}</text>`
     : ''
 
-  const bulletSvg = (bullets || []).slice(0, 5).map((b, idx) => {
-    const y = 720 + idx * 72
-    return `<text x="140" y="${y}" font-size="34" font-weight="650" fill="rgba(234,240,255,0.82)">• ${escapeXml(b)}</text>`
-  }).join('')
+  const bulletSvg = (bullets || [])
+    .slice(0, 5)
+    .map((b, idx) => {
+      const y = 720 + idx * 72
+      return `<text x="140" y="${y}" font-size="34" font-weight="650" fill="rgba(234,240,255,0.82)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">• ${escapeXml(b)}</text>`
+    })
+    .join('')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1080" height="1350" viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
@@ -119,8 +125,8 @@ function svgSlide({ page, title, subtitle, bullets }) {
   <circle cx="900" cy="260" r="320" fill="#22D3EE" opacity="0.12"/>
   <circle cx="240" cy="1100" r="340" fill="#7C3AED" opacity="0.14"/>
 
-  <text x="120" y="140" font-size="28" font-weight="750" fill="rgba(234,240,255,0.72)">ThiveLab · 가성비 IT 구매가이드</text>
-  <text x="960" y="140" text-anchor="end" font-size="28" font-weight="850" fill="rgba(234,240,255,0.72)">${page}/5</text>
+  <text x="120" y="140" font-size="28" font-weight="750" fill="rgba(234,240,255,0.72)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">ThiveLab · 가성비 IT 구매가이드</text>
+  <text x="960" y="140" text-anchor="end" font-size="28" font-weight="850" fill="rgba(234,240,255,0.72)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">${page}/5</text>
 
   <rect x="100" y="240" width="880" height="980" rx="48" fill="rgba(15,23,42,0.68)" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
   <path d="M140 640H940" stroke="url(#accent)" stroke-width="10" stroke-linecap="round" opacity="0.65"/>
@@ -129,7 +135,7 @@ function svgSlide({ page, title, subtitle, bullets }) {
   ${subtitleSvg}
   ${bulletSvg}
 
-  <text x="120" y="1290" font-size="26" font-weight="650" fill="rgba(234,240,255,0.62)">저장해두고 필요할 때 보세요</text>
+  <text x="120" y="1290" font-size="26" font-weight="650" fill="rgba(234,240,255,0.62)" font-family="'Noto Sans CJK KR','Noto Sans KR',system-ui,-apple-system,'Segoe UI',Roboto,Arial">저장해두고 필요할 때 보세요</text>
 </svg>`
 }
 
