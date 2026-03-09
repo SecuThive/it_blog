@@ -4,8 +4,6 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export default function CookieBanner() {
-  const [show, setShow] = useState(false)
-
   // Initialize from localStorage once; avoids setState inside effect (eslint rule).
   const [show, setShow] = useState(() => {
     try {
