@@ -179,6 +179,18 @@ async function uploadToStorage(localFiles, prefix) {
   return urls
 }
 
+async function fetchJsonWithTimeout(url, opts = {}, timeoutMs = 12000) {
+  const ac = new AbortController()
+  const t = setTimeout(() => ac.abort(), timeoutMs)
+  try {
+    const res = await fetch(url, { ...opts, signal: ac.signal })
+    const json = await res.json().catch(() => ({}))
+    return { res, json }
+  } finally {
+    clearTimeout(t)
+  }
+}
+
 async function graphPost(pathname, token, params) {
   const url = new URL(`https://graph.facebook.com/v19.0${pathname}`)
   url.searchParams.set('access_token', token)
@@ -186,8 +198,7 @@ async function graphPost(pathname, token, params) {
   const body = new URLSearchParams()
   for (const [k, v] of Object.entries(params)) body.set(k, String(v))
 
-  const res = await fetch(url, { method: 'POST', body })
-  const json = await res.json().catch(() => ({}))
+  const { res, json } = await fetchJsonWithTimeout(url, { method: 'POST', body }, 20000)
   if (!res.ok) {
     const msg = json?.error?.message || res.statusText
     throw new Error(`${res.status} ${msg}`)
@@ -195,7 +206,46 @@ async function graphPost(pathname, token, params) {
   return json
 }
 
+async function graphGet(pathname, token, params = {}) {
+  const url = new URL(`https://graph.facebook.com/v19.0${pathname}`)
+  url.searchParams.set('access_token', token)
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
+
+  const { res, json } = await fetchJsonWithTimeout(url, { method: 'GET' }, 20000)
+  if (!res.ok) {
+    const msg = json?.error?.message || res.statusText
+    throw new Error(`${res.status} ${msg}`)
+  }
+  return json
+}
+
+async function assertPublicImageUrlsOk(urls) {
+  for (const u of urls) {
+    // HEAD is sometimes blocked; use GET with Range when possible.
+    const url = new URL(u)
+    const { res } = await fetchJsonWithTimeout(url, {
+      method: 'GET',
+      headers: { Range: 'bytes=0-2000' },
+    })
+    if (!res.ok) throw new Error(`Image URL not accessible (${res.status}): ${u}`)
+  }
+}
+
+async function verifyPublishedMedia(token, mediaId) {
+  // Best-effort verification. Not all fields are accessible depending on permissions.
+  const data = await graphGet(`/${mediaId}`, token, {
+    fields: 'id,media_type,media_product_type,permalink,timestamp,username',
+  })
+  if (!data?.id) throw new Error('Published media verify failed: missing id')
+  return data
+}
+
 async function publishCarousel({ igId, token, imageUrls, caption }) {
+  if (!Array.isArray(imageUrls) || imageUrls.length < 2) throw new Error('Need >=2 images for carousel')
+
+  // Pre-flight: ensure URLs are publicly reachable (prevents broken uploads).
+  await assertPublicImageUrlsOk(imageUrls)
+
   // 1) children
   const childIds = []
   for (const u of imageUrls) {
@@ -207,12 +257,17 @@ async function publishCarousel({ igId, token, imageUrls, caption }) {
   const carousel = await graphPost(`/${igId}/media`, token, {
     media_type: 'CAROUSEL',
     children: childIds.join(','),
-    caption,
+    caption: truncateCaption(caption, 2200),
   })
 
   // 3) publish
   const published = await graphPost(`/${igId}/media_publish`, token, { creation_id: carousel.id })
-  return { childIds, creationId: carousel.id, mediaId: published.id }
+  const mediaId = published.id
+
+  // Post-flight: verify publish succeeded.
+  const verified = await verifyPublishedMedia(token, mediaId)
+
+  return { childIds, creationId: carousel.id, mediaId, verified }
 }
 
 async function pickNextPost() {
@@ -224,13 +279,41 @@ async function pickNextPost() {
     .select('id,slug,title,category,tags,created_at')
     .contains('tags', ['가성비'])
     .order('created_at', { ascending: false })
-    .limit(30)
+    .limit(50)
 
   if (error) throw error
 
-  const candidate = (data || []).find((p) => p?.slug && !already.has(p.slug))
-  if (!candidate) return null
-  return candidate
+  const rows = data || []
+
+  // Score: prefer evergreen guides (가이드/고르는 법/계산법), then recency.
+  function score(p) {
+    const title = safeText(p.title)
+    const isGuide = /(가이드|고르는\s*법|계산법|체크리스트)/.test(title)
+    const t = new Date(p.created_at || 0).getTime()
+    return (isGuide ? 10 : 0) + t / 1e13
+  }
+
+  const sorted = rows
+    .filter((p) => p?.slug && !already.has(p.slug))
+    .sort((a, b) => score(b) - score(a))
+
+  return sorted[0] || null
+}
+
+function normalizeCaption(text) {
+  // Keep newlines, normalize odd whitespace.
+  return String(text || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/[\t\f\v]+/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[ ]{2,}/g, ' ')
+    .trim()
+}
+
+function truncateCaption(text, max = 2200) {
+  const t = normalizeCaption(text)
+  if (t.length <= max) return t
+  return `${t.slice(0, Math.max(0, max - 1)).trim()}…`
 }
 
 function buildCaption(post) {
@@ -240,7 +323,8 @@ function buildCaption(post) {
   // CTA question for comments
   const question = '댓글로 용도(문서/개발/영상) + 예산(만원) 남겨주면 가성비로 추천해줄게요.'
 
-  return `${title}\n\n🔎 자세히 보기: ${url}\n\n${question}\n\n#가성비 #구매팁 #ThiveLab`
+  const base = `${title}\n\n🔎 자세히 보기: ${url}\n\n${question}\n\n#가성비 #구매팁 #ThiveLab`
+  return truncateCaption(base, 2200)
 }
 
 function buildSlidesForPost(post) {
@@ -311,6 +395,8 @@ async function main() {
   const token = fs.readFileSync(IG_TOKEN_PATH, 'utf8').trim()
   if (!token) throw new Error('Empty IG token')
 
+  const dryRun = String(process.env.DRY_RUN || '').toLowerCase() === 'true'
+
   const post = await pickNextPost()
   if (!post) {
     console.log(JSON.stringify({ ok: true, skipped: true, reason: 'no-new-post' }))
@@ -333,6 +419,11 @@ async function main() {
   const imageUrls = await uploadToStorage(jpgFiles, prefix)
   const caption = buildCaption(post)
 
+  if (dryRun) {
+    console.log(JSON.stringify({ ok: true, dryRun: true, slug: post.slug, imageUrlsCount: imageUrls.length }, null, 2))
+    return
+  }
+
   const published = await publishCarousel({ igId: IG_BUSINESS_ID, token, imageUrls, caption })
 
   appendLedger({
@@ -342,6 +433,7 @@ async function main() {
     category: post.category,
     mediaId: published.mediaId,
     creationId: published.creationId,
+    permalink: published.verified?.permalink,
     imageUrls,
   })
 
