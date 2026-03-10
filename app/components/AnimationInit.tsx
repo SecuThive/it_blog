@@ -10,23 +10,28 @@ export default function AnimationInit() {
 
   // 페이지 이동(pathname 변경) 시: 전체 초기화 + 재관찰
   useEffect(() => {
-    const elements = document.querySelectorAll<Element>('.animate-up')
-    elements.forEach((el) => el.classList.remove('is-visible'))
+    document.querySelectorAll<Element>('.animate-up').forEach((el) => el.classList.remove('is-visible'))
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible')
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.06, rootMargin: '0px 0px -30px 0px' }
-    )
+    let observer: IntersectionObserver | null = null
+    const timerId = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible')
+              observer!.unobserve(entry.target)
+            }
+          })
+        },
+        { threshold: 0.06, rootMargin: '0px 0px -30px 0px' }
+      )
+      document.querySelectorAll<Element>('.animate-up').forEach((el) => observer!.observe(el))
+    }, 50)
 
-    elements.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(timerId)
+      observer?.disconnect()
+    }
   }, [pathname])
 
   // 페이지네이션(searchParams 변경) 시: is-visible 없는 요소만 관찰
