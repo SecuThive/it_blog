@@ -7,6 +7,7 @@ import AnimationInit from './components/AnimationInit'
 import DynamicUI from './components/DynamicUI'
 import CookieBanner from './components/CookieBanner'
 import GoogleAnalytics from './components/GoogleAnalytics'
+import { Analytics } from '@vercel/analytics/next'
 import { getPostCategorySummaries } from './lib/posts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
@@ -87,6 +88,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         <div className="page-bg" />
+        <Analytics />
         <Suspense fallback={null}><AnimationInit /></Suspense>
         <DynamicUI />
         <GoogleAnalytics />
