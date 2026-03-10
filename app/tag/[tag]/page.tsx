@@ -44,7 +44,7 @@ export default async function TagPage({ params }: TagPageProps) {
   const { tag } = await params
 
   const [summary, posts] = await Promise.all([getTagSummary(tag), getPostsByTag(tag)])
-  if (!summary || posts.length === 0) notFound()
+  if (!summary) notFound()
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -75,9 +75,10 @@ export default async function TagPage({ params }: TagPageProps) {
       </header>
 
       <div className="category-list">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        {posts.length > 0
+          ? posts.map((post) => <PostCard key={post.id} post={post} />)
+          : <p className="home-empty">글을 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
+        }
       </div>
 
       <Link href="/" className="back-link">

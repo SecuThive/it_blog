@@ -158,7 +158,11 @@ export async function getTagSummary(tag: string): Promise<TagSummary | null> {
     .select('*', { count: 'exact', head: true })
     .contains('tags', [t])
 
-  if (error) return null
+  if (error) {
+    console.error('[getTagSummary] Supabase error:', error)
+    return null
+  }
+  if ((count ?? 0) === 0) return null
   return { tag: t, count: count ?? 0, description: describeTag(t) }
 }
 
@@ -173,7 +177,11 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  if (error || !postRows?.length) return []
+  if (error) {
+    console.error('[getPostsByTag] Supabase error:', error, '| tag:', t)
+    return []
+  }
+  if (!postRows?.length) return []
 
   const postIds = postRows.map((p) => p.id)
   const { data: sectionRows } = await supabase
