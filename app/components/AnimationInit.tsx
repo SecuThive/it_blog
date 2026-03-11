@@ -12,25 +12,43 @@ export default function AnimationInit() {
   useEffect(() => {
     document.querySelectorAll<Element>('.animate-up').forEach((el) => el.classList.remove('is-visible'))
 
-    let observer: IntersectionObserver | null = null
+    let io: IntersectionObserver | null = null
+    let mo: MutationObserver | null = null
+
     const timerId = setTimeout(() => {
-      observer = new IntersectionObserver(
+      io = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add('is-visible')
-              observer!.unobserve(entry.target)
+              io!.unobserve(entry.target)
             }
           })
         },
         { threshold: 0.06, rootMargin: '0px 0px -30px 0px' }
       )
-      document.querySelectorAll<Element>('.animate-up').forEach((el) => observer!.observe(el))
+      document.querySelectorAll<Element>('.animate-up').forEach((el) => io!.observe(el))
+
+      // loading.tsx 이후 실제 콘텐츠(PostCard 등)가 DOM에 마운트될 때도 관찰
+      mo = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType !== Node.ELEMENT_NODE) continue
+            const el = node as Element
+            if (el.classList.contains('animate-up') && !el.classList.contains('is-visible')) {
+              io!.observe(el)
+            }
+            el.querySelectorAll<Element>('.animate-up:not(.is-visible)').forEach((child) => io!.observe(child))
+          }
+        }
+      })
+      mo.observe(document.body, { childList: true, subtree: true })
     }, 50)
 
     return () => {
       clearTimeout(timerId)
-      observer?.disconnect()
+      io?.disconnect()
+      mo?.disconnect()
     }
   }, [pathname])
 
