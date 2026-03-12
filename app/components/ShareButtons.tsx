@@ -7,10 +7,11 @@ type Props = { title: string; url: string }
 export default function ShareButtons({ title, url }: Props) {
   const [copied, setCopied] = useState(false)
 
-  function shareKakao() {
-    // Using KakaoStory share (KakaoTalk sharing requires app key/template).
-    const storyUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`
-    window.open(storyUrl, '_blank', 'width=500,height=600')
+  function shareFacebook() {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      '_blank', 'width=580,height=400'
+    )
   }
 
   function shareX() {
@@ -31,11 +32,11 @@ export default function ShareButtons({ title, url }: Props) {
     <div className="share-buttons" aria-label="공유하기">
       <span className="share-buttons__label">공유</span>
 
-      <button className="share-btn share-btn--kakao" onClick={shareKakao} aria-label="카카오스토리 공유">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.618 5.082 4.073 6.533L5.055 21l4.763-2.583C10.245 18.473 11.113 18.6 12 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z"/>
+      <button className="share-btn share-btn--facebook" onClick={shareFacebook} aria-label="Facebook 공유">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
         </svg>
-        카카오
+        Facebook
       </button>
 
       <button className="share-btn share-btn--x" onClick={shareX} aria-label="X(트위터) 공유">
