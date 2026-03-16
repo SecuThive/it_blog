@@ -229,13 +229,11 @@ function detectPostTemplate({ category, rawTitle }) {
 }
 
 function titleForTemplateA(rawTitle, category) {
-  const head = stripPressPrefix(rawTitle) || category
-  return `${head} 공개 정리: 핵심 포인트와 추천 체크리스트`
+  return stripPressPrefix(rawTitle) || category
 }
 
 function titleForTemplateB(rawTitle, category) {
-  const head = stripPressPrefix(rawTitle) || category
-  return `${head} 업데이트/이슈 정리: 핵심 변경점과 대응 체크리스트`
+  return stripPressPrefix(rawTitle) || category
 }
 
 function buildSectionsTemplateA({ rawTitle, category, sourceName, sourceUrl, publishedAt }) {
@@ -440,7 +438,7 @@ async function buildDetailedKoreanPost(item, feed) {
 
   return {
     title,
-    description: `상세 요약/체크리스트: ${rawTitle || category || 'IT'}`,
+    description: ensureText(rawTitle || category || 'IT').slice(0, 160),
     category,
     tags: inferTags(rawTitle || title, category),
     hotlinkCover,

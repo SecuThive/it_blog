@@ -263,7 +263,7 @@ function buildSectionsB({ rawTitle, extracted, sourceName, sourceUrl, publishedI
 
 function inferDescription(template, rawTitle) {
   const base = ensureText(rawTitle).slice(0, 120)
-  return template === 'A' ? `리뷰/체크리스트: ${base}` : `정보 정리/체크리스트: ${base}`
+  return base
 }
 
 async function main() {

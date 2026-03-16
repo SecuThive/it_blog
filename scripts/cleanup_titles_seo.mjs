@@ -75,31 +75,14 @@ function toSeoHead({ title, description, category }) {
   base = base.replace(/\s*[-:–—]+\s*$/g, '')
   base = ensureText(base).slice(0, 70)
 
-  // If still English-heavy and category is known, add Korean framing.
+  // If still English-heavy, strip common press-release verb prefixes for cleanliness.
   const hasHangul = /[가-힣]/.test(base)
   if (!hasHangul) {
-    // If it's still English-heavy, keep it but avoid awkward prefixes.
-    // Prefer turning it into a short headline rather than a long pasted sentence.
     base = base
       .replace(/^Apple today (announced|unveiled|introduced|revealed)\s+/i, '')
       .replace(/^Apple (announced|unveiled|introduced|revealed)\s+/i, '')
       .replace(/^Samsung Electronics (unveiled|announced|introduced)\s+/i, '')
-      .slice(0, 60)
-
-    // Add a minimal Korean frame for readability
-    const map = {
-      laptop: '노트북',
-      smartphone: '스마트폰',
-      tablet: '태블릿',
-      desktop: '데스크탑',
-      wearable: '웨어러블',
-      audio: '오디오',
-      software: '소프트웨어',
-      ai: 'AI',
-      'it-news': 'IT',
-    }
-    const prefix = map[category] || 'IT'
-    base = `${prefix}: ${base}`.slice(0, 70)
+      .trim()
   }
 
   // Remove dangling "with" etc.
@@ -140,7 +123,7 @@ function buildTitle({ category, title, description }) {
     return head
   }
 
-  return template === 'A' ? `${head} ${SUFFIX_A}` : `${head} ${SUFFIX_B}`
+  return head
 }
 
 async function main() {
