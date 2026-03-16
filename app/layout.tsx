@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: 'AI가 큐레이션하는 IT 인사이트 — 한국 소비자 관점의 기기 소식/업데이트 정리',
+  description: '한국 소비자 관점의 IT 인사이트 — 스마트폰·노트북·AI 서비스 최신 소식을 빠르고 정확하게 전달합니다.',
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
-    description: 'AI가 큐레이션하는 IT 인사이트 — 한국 소비자 관점의 기기 소식/업데이트 정리',
+    description: '한국 소비자 관점의 IT 인사이트 — 스마트폰·노트북·AI 서비스 최신 소식을 빠르고 정확하게 전달합니다.',
     images: [`${SITE_URL}/og-default.svg`],
   },
   robots: {
@@ -105,8 +105,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 ThiveLab
               </Link>
               <p className="footer-brand-desc">
-                AI가 수집·분석한 최신 IT 정보를 사람 에디터가 검수해 제공하는
-                AI 기반 IT 큐레이션 미디어입니다.
+                한국 소비자 관점에서 스마트폰·노트북·AI 서비스 최신 IT 정보를
+                빠르고 정확하게 전달하는 IT 큐레이션 미디어입니다.
               </p>
               <div className="footer-social-links">
                 <a
@@ -123,8 +123,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 </a>
               </div>
 
-              <p className="footer-ai-notice">
-                🤖 이 블로그는 AI가 콘텐츠를 수집·작성하고 사람 에디터가 검수합니다.
+              <p className="footer-ad-notice">
+                일부 콘텐츠 작성 과정에서 IT 도구를 보조적으로 활용하며, 모든 게시물은 에디터 검수 후 발행됩니다.
               </p>
               <p className="footer-ad-notice">
                 이 블로그는 쿠팡 파트너스 등 제휴 마케팅을 통해 수익을 얻을 수 있습니다.
