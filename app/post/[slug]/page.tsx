@@ -59,7 +59,8 @@ function deriveAccessoryKeyword(title: string, tags: string[]): string {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug)
   const post = await getPostBySlug(slug)
   if (!post) return { title: '게시글 없음', robots: { index: false } }
   const ogImage = post.coverImageUrl || `${SITE_URL}/og-default.svg`
@@ -86,7 +87,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug)
   const post = await getPostBySlug(slug)
   if (!post) notFound()
 
