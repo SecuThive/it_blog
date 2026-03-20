@@ -16,6 +16,7 @@ export type Post = {
   category: PostCategory
   tags: string[]
   createdAt: string
+  updatedAt?: string | null
   readMinutes: number
   author: string
   featured?: boolean
@@ -55,6 +56,7 @@ function rowToPost(row: Record<string, unknown>, sections: Record<string, unknow
     category: row.category as PostCategory,
     tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
     createdAt: String(row.created_at),
+    updatedAt: row.updated_at ? String(row.updated_at) : null,
     readMinutes: Number(row.read_minutes),
     author: String(row.author),
     featured: Boolean(row.featured),
@@ -83,6 +85,25 @@ export async function getPaginatedPosts(page: number, pageSize: number): Promise
     .select('*')
     .order('created_at', { ascending: false })
     .range(from, to)
+
+  if (error || !postRows?.length) return []
+
+  const postIds = postRows.map((p) => p.id)
+  const { data: sectionRows } = await supabase
+    .from('post_sections')
+    .select('*')
+    .in('post_id', postIds)
+    .order('position', { ascending: true })
+
+  return postRows.map((row) => rowToPost(row, sectionRows ?? []))
+}
+
+export async function getRecentPosts(limit: number): Promise<Post[]> {
+  const { data: postRows, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
 
   if (error || !postRows?.length) return []
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import ContactForm from '../components/ContactForm'
 
 export const metadata: Metadata = {
   title: '문의하기 | ThiveLab',
@@ -68,60 +69,7 @@ export default function ContactPage() {
         <p className="info-section__desc">
           아래 양식을 작성해 주시면 검토 후 이메일로 회신드립니다.
         </p>
-        <form className="contact-form" action="#" method="POST">
-          <div className="contact-form__row">
-            <div className="contact-form__field">
-              <label htmlFor="cf-name">이름 *</label>
-              <input
-                id="cf-name"
-                name="name"
-                type="text"
-                placeholder="홍길동"
-                required
-                autoComplete="name"
-              />
-            </div>
-            <div className="contact-form__field">
-              <label htmlFor="cf-email">이메일 *</label>
-              <input
-                id="cf-email"
-                name="email"
-                type="email"
-                placeholder="example@email.com"
-                required
-                autoComplete="email"
-              />
-            </div>
-          </div>
-          <div className="contact-form__field">
-            <label htmlFor="cf-subject">문의 유형</label>
-            <select id="cf-subject" name="subject">
-              <option value="">선택해주세요</option>
-              <option value="correction">오류·정보 수정 제보</option>
-              <option value="sponsorship">협찬·제품 제공 제안</option>
-              <option value="business">비즈니스·제휴 문의</option>
-              <option value="privacy">개인정보 관련 요청</option>
-              <option value="other">기타</option>
-            </select>
-          </div>
-          <div className="contact-form__field">
-            <label htmlFor="cf-message">문의 내용 *</label>
-            <textarea
-              id="cf-message"
-              name="message"
-              rows={6}
-              placeholder="문의하실 내용을 자세히 작성해 주세요."
-              required
-            />
-          </div>
-          <p className="contact-form__notice">
-            제출하시면 <Link href="/privacy">개인정보처리방침</Link>에 동의하는 것으로
-            간주합니다.
-          </p>
-          <button type="submit" className="contact-form__submit">
-            문의 보내기
-          </button>
-        </form>
+        <ContactForm />
       </section>
 
       {/* 관련 링크 */}

@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import PostCard from './components/PostCard'
 import Pagination from './components/Pagination'
-import { getAllPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel, getAllTags } from './lib/posts'
+import { getRecentPosts, getFeaturedPosts, getPostCategorySummaries, getPaginatedPosts, getPostsCount, getCategoryLabel, getAllTags } from './lib/posts'
 
 const PAGE_SIZE = 5
 
@@ -13,18 +13,18 @@ export default async function Home({ searchParams }: Props) {
   const { page } = await searchParams
   const currentPage = Math.max(1, parseInt(page ?? '1') || 1)
 
-  const [featured, pagedPosts, totalCount, allPosts, categories, tags] = await Promise.all([
+  const [featured, pagedPosts, totalCount, recentPosts, categories, tags] = await Promise.all([
     getFeaturedPosts(),
     getPaginatedPosts(currentPage, PAGE_SIZE),
     getPostsCount(),
-    getAllPosts(),
+    getRecentPosts(5),
     getPostCategorySummaries(),
     getAllTags(),
   ])
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
-  const hotPosts = allPosts.slice(0, 5)
-  const leadPost = allPosts[0]
-  const leadSecondary = allPosts.slice(1, 4)
+  const hotPosts = recentPosts.slice(0, 5)
+  const leadPost = recentPosts[0]
+  const leadSecondary = recentPosts.slice(1, 4)
 
   return (
     <div className="container home">
@@ -94,7 +94,7 @@ export default async function Home({ searchParams }: Props) {
       {/* ── 통계 바 ───────────────────────────────── */}
       <div className="home-stats animate-up" aria-label="블로그 통계">
         <div className="home-stat">
-          <strong data-count={allPosts.length} data-suffix="+">{allPosts.length}+</strong>
+          <strong data-count={totalCount} data-suffix="+">{totalCount}+</strong>
           <span>누적 리뷰</span>
         </div>
         <div className="home-stat">
